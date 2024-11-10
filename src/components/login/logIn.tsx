@@ -31,12 +31,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const courses = [
-    "BS Information Technology",
-    "BS Computer Science",
-    "BS Civil Engineering",
-    "BS Mechanical Engineering",
-    "BS Electrical Engineering",
-    // Add more courses as needed
+    "BS Accountancy (BSA)",
+    "BS Management Accounting (BSMA)",
+    "BS Hospitality Management (BSHM)",
+    "BS Business Administration Major in Financial Management (BSBA-FM)",
+    "BS Real Estate Management (BSREM)",
   ]
 
   const yearLevels = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
