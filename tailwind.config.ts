@@ -16,6 +16,8 @@ const config: Config = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        'custom-gray': '#999999',
+        'custom-blue': '#012B79',
         primaryBlue: {
           DEFAULT: "#012B79",
           50: "#F0F4FA",
