@@ -13,7 +13,7 @@ const PaymentInstructions = () => {
   return (
     <Card className="w-full lg:w-[650px]">
       <CardHeader>
-        <CardTitle className="text-2xl">Payment of Tuition Fees</CardTitle>
+        <CardTitle className="text-xl text-primaryBlue">Payment of Tuition Fees</CardTitle>
         <CardDescription>
           All payment shall be made at any accredited payment facilities below:
         </CardDescription>

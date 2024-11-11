@@ -77,7 +77,7 @@ const PaymentForm = () => {
   return (
     <Card className="w-full lg:w-[650px]">
       <CardHeader>
-        <CardTitle className="text-2xl">Submit Payment Form</CardTitle>
+        <CardTitle className="text-xl text-primaryBlue">Submit Payment Form</CardTitle>
         <CardDescription>Please enter the student's correct information</CardDescription>
       </CardHeader>
       <CardContent>

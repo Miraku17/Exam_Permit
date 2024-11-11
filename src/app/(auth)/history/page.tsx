@@ -71,10 +71,10 @@ const TransactionHistory = () => {
   );
 
   return (
-    <div className="p-4">
+    <div className="min-h-screen">
       <Card>
         <CardHeader>
-          <CardTitle className="text-[#1a237e] text-xl md:text-2xl">
+          <CardTitle className="text-primaryBlue text-xl">
             TRANSACTION HISTORY
           </CardTitle>
         </CardHeader>
