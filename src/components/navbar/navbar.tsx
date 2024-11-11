@@ -1,6 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, KeyRound } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +19,7 @@ const Navbar = () => {
           {/* Logo and Brand */}
           <div className="flex items-center">
             <img
-              src="/images/school-logo.png                                                                                                                                         "
+              src="/images/school-logo.png"
               alt="school logo"
               className="h-10 w-auto"
             />
@@ -20,34 +27,62 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="hover:text-gray-300 transition-colors">
+            <a href="#" className="hover:text-gray-300 transition-colors font-bold">
               Home
             </a>
-            <a href="#" className="hover:text-gray-300 transition-colors">
+            <a href="/payment" className="hover:text-gray-300 transition-colors font-bold">
               Payment
             </a>
-            <a href="#" className="hover:text-gray-300 transition-colors">
+            <a href="/history" className="hover:text-gray-300 transition-colors font-bold">
               History
             </a>
           </div>
 
-          {/* User Profile */}
+          {/* User Profile with Popover */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <img
-                  src="/images/user-profile.png                                                                                                                                         "
-                  alt="Profile"
-                  className="h-10 w-10 rounded-full"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">Cyrus Noel Carano-o</span>
-                <span className="text-xs text-gray-300">
-                  1st Year Student - BS CPE
-                </span>
-              </div>
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center space-x-3 cursor-pointer hover:opacity-80">
+                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <img
+                      src="/images/user-profile.png"
+                      alt="Profile"
+                      className="h-10 w-10 rounded-full"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Cyrus Noel Carano-o</span>
+                    <span className="text-xs text-gray-300">
+                      1st Year Student - BS CPE
+                    </span>
+                  </div>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-56">
+                <div className="space-y-4">
+                  {/* <div className="font-medium">Cyrus Noel Carano-o</div> */}
+                  {/* <Separator /> */}
+                  <div className="space-y-2">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-sm"
+                      onClick={() => {/* Add change password logic */}}
+                    >
+                      <KeyRound className="mr-2 h-4 w-4" />
+                      Change Password
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-sm text-red-500 hover:text-red-500 hover:bg-red-50"
+                      onClick={() => {/* Add sign out logic */}}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Mobile menu button */}
@@ -98,7 +133,7 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1">
                     <span className="text-sm font-medium">
                       Cyrus Noel Carano-o
                     </span>
@@ -106,6 +141,25 @@ const Navbar = () => {
                       1st Year Student - BS CPE
                     </span>
                   </div>
+                </div>
+                {/* Mobile Profile Actions */}
+                <div className="mt-3 space-y-2">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-white hover:text-white hover:bg-blue-900"
+                    onClick={() => {/* Add change password logic */}}
+                  >
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    Change Password
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-red-400 hover:text-red-400 hover:bg-blue-900"
+                    onClick={() => {/* Add sign out logic */}}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
                 </div>
               </div>
             </div>

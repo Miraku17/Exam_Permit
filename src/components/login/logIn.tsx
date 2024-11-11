@@ -88,7 +88,7 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         console.log('Logging in with:', formData.email, formData.password)
-        router.push('/dashboard')
+        router.push('/home')
 
       } else {
         console.log('Signing up with:', formData)

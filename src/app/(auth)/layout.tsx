@@ -26,7 +26,7 @@ export default function AuthLayout({
       <Navbar />
       
       {/* Main content area */}
-      <main className="max-w-[1600]  mx-auto   py-8">
+      <main className="max-w-[1600]  mx-auto py-12">
         {children}
       </main>
       
