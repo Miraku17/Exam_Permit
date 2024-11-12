@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import axios, {AxiosError} from "axios";
 
 export default function LoginPage() {
 
@@ -85,13 +86,22 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
+    const formData = new FormData(e.currentTarget);
+    const fullname = 'test';
+    const email = formData.get("email");
+    const password = formData.get("password");
     try {
       if (isLogin) {
-        console.log('Logging in with:', formData.email, formData.password)
+        console.log('Logging in with:', email, password)
         router.push('/home')
 
       } else {
         console.log('Signing up with:', formData)
+        await axios.post('/api/auth/signup', {
+          fullname,
+          email,
+          password,
+        })
       }
     } catch (error) {
       console.error(error)
