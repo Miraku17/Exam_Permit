@@ -1,10 +1,10 @@
 import React from 'react'
 import LoginPage from '@/components/login/logIn'
 
-const Home = () => {
+const Page = () => {
   return (
-    'This is Home'
+    <LoginPage />
   )
 }
 
-export default Home
+export default Page
