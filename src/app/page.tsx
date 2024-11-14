@@ -3,7 +3,7 @@ import LoginPage from '@/components/login/logIn'
 
 const Home = () => {
   return (
-    'This is Home'
+    <LoginPage/>
   )
 }
 
