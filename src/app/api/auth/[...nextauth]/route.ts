@@ -1,7 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth"
 import { connectDB } from "@/lib/mongodb";
-import User from "@/models/user";
+import User from "@/models/user"; 
 import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
@@ -39,6 +39,10 @@ const handler = NextAuth({
             return session;
         },
     },
+    session: {
+        strategy: "jwt",
+    },
+    secret: process.env.NEXTAUTH_SECRET,
     pages: {
         signIn: "/login",
     },
