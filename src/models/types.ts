@@ -29,3 +29,18 @@ export interface ISemester {
   year: number;
   courses: ICourse[];
 }
+
+
+export interface IPayment {
+  givenName: string;
+  familyName: string;
+  mobileNumber: string;
+  emailAddress: string;
+  referenceNumber: string;
+  paymentGateway: 'GCash';
+  proofOfPaymentUrl: string;
+  amount: number;
+  status: 'pending' | 'verified' | 'rejected';
+  createdAt: Date;
+  updatedAt: Date;
+}

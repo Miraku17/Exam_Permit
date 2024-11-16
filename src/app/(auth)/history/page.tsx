@@ -21,7 +21,7 @@ const transactions = [
     invoice: "INV001",
     date: "11 Nov, 2024",
     method: "GCASH",
-    status: "completed",
+    status: "verified",
     amount: 5000.00,
   },
   {
@@ -35,7 +35,7 @@ const transactions = [
     invoice: "INV003",
     date: "11 Nov, 2024",
     method: "GCASH",
-    status: "completed",
+    status: "verified",
     amount: 5000.00,
   },
 ];
@@ -53,14 +53,14 @@ const TransactionHistory = () => {
           <p className="text-sm text-gray-500">{transaction.date}</p>
         </div>
         <Badge 
-          variant={transaction.status === "completed" ? "success" : "secondary"}
+          variant={transaction.status === "verified" ? "success" : "secondary"}
           className={
-            transaction.status === "completed" 
+            transaction.status === "verified" 
               ? "bg-green-100 text-green-800 hover:bg-green-100" 
               : "bg-gray-200 text-gray-800 hover:bg-gray-200"
           }
         >
-          {transaction.status === "completed" ? "Completed" : "Pending"}
+          {transaction.status === "verified" ? "Verified" : "Pending"}
         </Badge>
       </div>
       <div className="flex justify-between items-center mt-2">
@@ -100,14 +100,14 @@ const TransactionHistory = () => {
                       <TableCell>{transaction.method}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={transaction.status === "completed" ? "success" : "secondary"}
+                          variant={transaction.status === "verified" ? "success" : "secondary"}
                           className={
-                            transaction.status === "completed" 
+                            transaction.status === "verified" 
                               ? "bg-green-100 text-green-800 hover:bg-green-100" 
                               : "bg-gray-200 text-gray-800 hover:bg-gray-200"
                           }
                         >
-                          {transaction.status === "completed" ? "Completed" : "Pending"}
+                          {transaction.status === "verified" ? "Verified" : "Pending"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
