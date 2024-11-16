@@ -25,17 +25,17 @@ const CourseSchema = new Schema<ICourse>({
       enum: ['Regular', 'Irregular'],
       default: 'Regular'
     },
-    terms: [TermSchema],
+    // terms: [TermSchema],
     totalCourseFee: {
       lecture: Number,
       laboratory: Number,
       total: Number
     },
-    totalPayments: {
-      type: Number,
-      default: 0
-    },
-    remainingBalance: Number
+    // totalPayments: {
+    //   type: Number,
+    //   default: 0
+    // },
+    // remainingBalance: Number
   });
   
   export default CourseSchema;

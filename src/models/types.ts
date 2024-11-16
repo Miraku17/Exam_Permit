@@ -19,8 +19,8 @@ export interface ICourse {
   status: "Regular" | "Irregular";
   terms: ITerm[];
   totalCourseFee: ITotalCourseFee;
-  totalPayments: number;
-  remainingBalance: number;
+  // totalPayments: number;
+  // remainingBalance: number;
 }
 
 export interface ISemester {
