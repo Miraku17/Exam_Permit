@@ -40,6 +40,8 @@ export default function LoginPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
 
+  const [error, setError] = useState('')
+
   const courses = [
     "BS Accountancy (BSA)",
     "BS Management Accounting (BSMA)",
@@ -106,8 +108,10 @@ export default function LoginPage() {
           });
 
           console.log(res);
+          setError(res?.error);
         } catch (error) {
           console.log(error);
+          return;
         }
         router.replace('/home')
 
@@ -331,6 +335,13 @@ export default function LoginPage() {
                 </p>
               </div>
             </form>
+            <div>
+              {error && (
+                <div className="bg-red-500 text-white w-fit text-sm py-1 px-3 rounded-md mt-2">
+                  {error}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

@@ -1,11 +1,10 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import NextAuth from "next-auth"
+import NextAuth from "next-auth";
 import connectDB from "@/lib/mongodb";
-import User from "@/models/user"; 
+import User from "@/models/user";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
-
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -15,39 +14,47 @@ export const authOptions = {
             },
             async authorize(credentials, req) {
                 await connectDB();
-                console.log(credentials);
-
+                
                 const userFound = await User.findOne({ email: credentials.email }).select("+password");
-                if (!userFound) throw new Error("Invalid credentials");
-
+                if (!userFound) throw new Error("Email doesn't exists");
+                
                 const passwordMatch = await bcrypt.compare(credentials.password, userFound.password);
-                if (!passwordMatch) throw new Error("Invalid credentials");
-
-                console.log(userFound);
-
-                return userFound;
+                if (!passwordMatch) throw new Error("Wrong password");
+                
+                // Don't send the password in the session
+                const userWithoutPassword = {
+                    _id: userFound._id.toString(),
+                    email: userFound.email,
+                    fullname: userFound.fullname,
+                    course: userFound.course,
+                    yearLevel: userFound.yearLevel
+                };
+                
+                return userWithoutPassword;
             },
         }),
     ],
     callbacks: {
-        jwt({account, token, user, profile, session}) {
-            if (user) token.user = user;
+        async jwt({ token, user }) {
+            if (user) {
+                token.user = user;
+            }
             return token;
         },
-        session({session, token}) {
-            session.user = token.user as any;
+        async session({ session, token }) {
+            session.user = token.user;
             return session;
-        },
+        }
     },
     session: {
-        strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     secret: process.env.NEXTAUTH_SECRET,
     pages: {
         signIn: "/login",
     },
-}
+};
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };

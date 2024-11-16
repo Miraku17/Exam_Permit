@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, X, LogOut, KeyRound } from "lucide-react";
 import {
   Popover,
@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { data: session, status } = useSession();
+  
   const navigationLinks = [
     { href: "/home", label: "Home" },
     { href: "/payment", label: "Payment" },
@@ -60,12 +63,16 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">Cyrus Noel Carano-o</span>
-                    <span className="text-xs text-gray-300">
-                      1st Year Student - BS CPE
-                    </span>
-                  </div>
+                  { session && session.user && (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{ session.user.fullname }</span>
+                      <span className="text-xs text-gray-300">
+                        {/* 1st Year Student - BS CPE */}
+                        { session.user.yearLevel + ' Student - ' + session.user.course }
+                      </span>
+                    </div>
+                  )
+                  }
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-56">
