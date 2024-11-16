@@ -1,66 +1,89 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
+import connectDB from "@/lib/mongodb";
 import Payment from "@/models/Payment";
+import { v2 as cloudinary } from 'cloudinary';
 
-// in your API route (pages/api/payments.ts)
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 export async function POST(req: NextRequest) {
-    try {
-      await connectDB();
-      const formData = await req.formData();
-  
-      // Log raw amount from formData
-      console.log("Raw amount from formData:", formData.get("amount"));
-      
-      // Convert and validate amount
-      const rawAmount = formData.get("amount");
-      const amount = parseFloat(rawAmount as string);
-      
-      // Log converted amount
-      console.log("Converted amount:", amount);
-      console.log("Amount type:", typeof amount);
-  
-      const paymentData = {
-        givenName: (formData.get("givenName") as string)?.trim(),
-        familyName: (formData.get("familyName") as string)?.trim(),
-        mobileNumber: (formData.get("mobileNumber") as string)?.trim(),
-        emailAddress: (formData.get("email") as string)?.trim().toLowerCase(),
-        referenceNumber: (formData.get("referenceNumber") as string)?.trim(),
-        paymentGateway: formData.get("paymentMethod") as "GCash",
-        amount: amount, 
-        proofOfPaymentUrl: "temporary_url",
-        status: "pending" as const,
-      };
-  
-      // Log the schema definition
-      console.log("Payment Schema:", Payment.schema.paths.amount);
-      
-      // Log payment data before save
-      console.log("Payment data before save:", {
-        ...paymentData,
-        amount: {
-          value: paymentData.amount,
-          type: typeof paymentData.amount
-        }
+  try {
+    await connectDB();
+    const formData = await req.formData();
+
+    // Handle image upload
+    const proofFile = formData.get("proofOfPayment") as File;
+    let proofOfPaymentUrl = "";
+
+    if (proofFile) {
+      // Convert File to Buffer
+      const bytes = await proofFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Upload to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: "payment-proofs",
+            resource_type: "auto",
+            allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+            max_file_size: 5000000, // 5MB
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(buffer);
       });
-  
-      // Create the payment
-      const payment = await Payment.create(paymentData);
-  
-      // Log the raw document before conversion
-      console.log("Raw payment document:", payment._doc);
-  
-      // Query the saved document
-      const savedPayment = await Payment.findById(payment._id).lean();
-      console.log("Retrieved payment:", savedPayment);
-  
-      return NextResponse.json(
-        {
-          message: "Payment submitted successfully",
-          payment: payment.toJSON(),
-        },
-        { status: 201 }
-      );
-    } catch (error: any) {
-      // ... error handling ...
+
+      // @ts-ignore (result will have secure_url)
+      proofOfPaymentUrl = result.secure_url;
     }
+
+    // Convert and validate amount
+    const rawAmount = formData.get("amount");
+    const amount = parseFloat(rawAmount as string);
+
+    const paymentData = {
+      givenName: (formData.get("givenName") as string)?.trim(),
+      familyName: (formData.get("familyName") as string)?.trim(),
+      mobileNumber: (formData.get("mobileNumber") as string)?.trim(),
+      emailAddress: (formData.get("email") as string)?.trim().toLowerCase(),
+      referenceNumber: (formData.get("referenceNumber") as string)?.trim(),
+      paymentGateway: formData.get("paymentMethod") as "GCash",
+      amount: amount,
+      proofOfPaymentUrl: proofOfPaymentUrl,
+      status: "pending" as const,
+    };
+
+    // Create the payment
+    const payment = await Payment.create(paymentData);
+
+    return NextResponse.json(
+      {
+        message: "Payment submitted successfully",
+        payment: payment.toJSON(),
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error("Payment submission error:", error);
+    return NextResponse.json(
+      {
+        message: error.message || "Error submitting payment",
+      },
+      { status: 500 }
+    );
   }
+}
+
+// Configure the API route to handle larger file uploads
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
