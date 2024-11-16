@@ -1,10 +1,10 @@
-import React from 'react'
-import LoginPage from '@/components/login/logIn'
+
+import Providers from '@/Providers'
+import { redirect } from 'next/navigation'
+import { Children } from 'react'
 
 const Home = () => {
-  return (
-    <LoginPage/>
-  )
+  redirect('/login');
 }
 
 export default Home

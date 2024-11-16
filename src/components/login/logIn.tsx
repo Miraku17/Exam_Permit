@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import axios, {AxiosError} from "axios";
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
 
@@ -38,6 +39,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+
+  const [error, setError] = useState('')
 
   const courses = [
     "BS Accountancy (BSA)",
@@ -79,6 +82,7 @@ export default function LoginPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
+    console.log('is logged in', isLogin);
     
     if (!isLogin && !validatePasswords()) {
       return
@@ -86,22 +90,56 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
-    const formData = new FormData(e.currentTarget);
-    const fullname = 'test';
-    const email = formData.get("email");
-    const password = formData.get("password");
+    console.log(formData);
+    // const formData = new FormData(e.currentTarget);
+    const email = formData["email"];
+    const password = formData["password"];
+    const fullname = formData["fullName"];
+    const course = formData["course"];
+    const yearLevel = formData["year"];
     try {
       if (isLogin) {
         console.log('Logging in with:', email, password)
-        router.push('/home')
+        try {
+          const res = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+
+          console.log(res);
+          setError(res?.error);
+        } catch (error) {
+          console.log(error);
+          return;
+        }
+        router.replace('/home')
 
       } else {
-        console.log('Signing up with:', formData)
-        await axios.post('/api/auth/signup', {
+
+        const data = {
           fullname,
           email,
           password,
-        })
+          course,
+          yearLevel
+        }
+        
+        console.log('Signing up with:', data)
+        const response = await axios.post('/api/auth/signup', data);
+        console.log(response);
+
+        try {
+          const res = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+
+        router.replace("home");
       }
     } catch (error) {
       console.error(error)
@@ -113,9 +151,6 @@ export default function LoginPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    if (name === 'password' || name === 'confirmPassword') {
-      setPasswordError('')
-    }
   }
 
   return (
@@ -292,7 +327,7 @@ export default function LoginPage() {
                   {isLogin ? "Don't have an account yet?" : "Already have an account?"}{' '}
                   <button 
                     type="button"
-                    onClick={() => setIsLogin(!isLogin)}
+                    onClick={() => setIsLogin(status => !status)}
                     className="text-primaryBlue hover:text-blue-700 underline underline-offset-2 font-medium transition-colors"
                   >
                     {isLogin ? 'Sign Up' : 'Sign In'}
@@ -300,6 +335,13 @@ export default function LoginPage() {
                 </p>
               </div>
             </form>
+            <div>
+              {error && (
+                <div className="bg-red-500 text-white w-fit text-sm py-1 px-3 rounded-md mt-2">
+                  {error}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

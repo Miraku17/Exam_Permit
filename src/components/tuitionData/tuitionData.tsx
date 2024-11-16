@@ -14,8 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { useSession } from 'next-auth/react';
 
 const TuitionData = () => {
+  const { data: session, status } = useSession();
+
   const courseData = [
     { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 0.00, status: 'Regular' },
     { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 1500.00, status: 'Regular' },
@@ -36,7 +39,8 @@ const TuitionData = () => {
       <CardHeader className="text-center">
         <CardTitle>1ST Semester</CardTitle>
         <div className="text-blue-800 font-bold mt-2">
-          [18103903] CARANAO-O, CYRUS NOEL - BS CPE
+          {/* [18103903] CARANAO-O, CYRUS NOEL - BS CPE */}
+          { session && session.user && session.user.fullname + ' - ' + session.user.course}
         </div>
       </CardHeader>
       <CardContent>

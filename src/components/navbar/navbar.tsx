@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, X, LogOut, KeyRound } from "lucide-react";
 import {
   Popover,
@@ -9,10 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { data: session, status } = useSession();
+  
   const navigationLinks = [
     { href: "/home", label: "Home" },
     { href: "/payment", label: "Payment" },
@@ -59,12 +63,16 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">Cyrus Noel Carano-o</span>
-                    <span className="text-xs text-gray-300">
-                      1st Year Student - BS CPE
-                    </span>
-                  </div>
+                  { session && session.user && (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{ session.user.fullname }</span>
+                      <span className="text-xs text-gray-300">
+                        {/* 1st Year Student - BS CPE */}
+                        { session.user.yearLevel + ' Student - ' + session.user.course }
+                      </span>
+                    </div>
+                  )
+                  }
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-56">
@@ -81,7 +89,7 @@ const Navbar = () => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-sm text-red-500 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => {/* Add sign out logic */}}
+                      onClick={() => {signOut()}}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -153,7 +161,7 @@ const Navbar = () => {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start text-red-400 hover:text-red-400 hover:bg-blue-900"
-                    onClick={() => {/* Add sign out logic */}}
+                    onClick={() => {signOut()}}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
