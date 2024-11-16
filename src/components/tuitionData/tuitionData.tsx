@@ -29,7 +29,6 @@ const TuitionData = () => {
     { term: 'Midterm', due: 1500.00, paid: 1500.00, balance: 1500.00 },
     { term: 'Pre-Final', due: 1500.00, paid: 1500.00, balance: 1500.00 },
     { term: 'Final', due: 1500.00, paid: 1500.00, balance: 1500.00 },
-    { term: 'Total', due: 1500.00, paid: 1500.00, balance: 1500.00 },
   ];
 
   return (
@@ -84,7 +83,7 @@ const TuitionData = () => {
 
           {/* Payment Schedule Section */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-3">
+            <div className="lg:col-span-3">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -92,6 +91,7 @@ const TuitionData = () => {
                     <TableHead>Due*</TableHead>
                     <TableHead>Paid</TableHead>
                     <TableHead>Balance</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -101,8 +101,23 @@ const TuitionData = () => {
                       <TableCell>{payment.due.toFixed(2)}</TableCell>
                       <TableCell>{payment.paid.toFixed(2)}</TableCell>
                       <TableCell>{payment.balance.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
+                          disabled={payment.balance > 0}
+                        >
+                          Request Permit
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
+                  <TableRow>
+                    <TableCell className="font-bold">Total</TableCell>
+                    <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.due, 0).toFixed(2)}</TableCell>
+                    <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.paid, 0).toFixed(2)}</TableCell>
+                    <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.balance, 0).toFixed(2)}</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>
@@ -117,10 +132,6 @@ const TuitionData = () => {
                 <div className="font-bold">Remaining Balance</div>
                 <div>10.00</div>
               </div>
-
-              <Button className="w-full bg-green-600 hover:bg-green-700" disabled>
-                Request Exam Permit
-              </Button>
             </div>
           </div>
         </div>
