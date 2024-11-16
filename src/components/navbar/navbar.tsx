@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,7 +82,7 @@ const Navbar = () => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-sm text-red-500 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => {/* Add sign out logic */}}
+                      onClick={() => {signOut()}}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -153,7 +154,7 @@ const Navbar = () => {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start text-red-400 hover:text-red-400 hover:bg-blue-900"
-                    onClick={() => {/* Add sign out logic */}}
+                    onClick={() => {signOut()}}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
