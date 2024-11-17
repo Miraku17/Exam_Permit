@@ -1,10 +1,5 @@
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,35 +9,104 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
-const TuitionData = ({data}) => {
-  const { data: session, status } = useSession();
+interface Course {
+  courseCode: string;
+  academicUnits: number;
+  lecValue: number;
+  labValue: number;
+  status: string;
+}
 
-  // const courseData = [
-  //   { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 0.00, status: 'Regular' },
-  //   { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 1500.00, status: 'Regular' },
-  //   { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 0.00, status: 'Regular' },
-  //   { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 0.00, status: 'Regular' },
-  //   { code: 'PRIACC130', units: 1.0, lecValue: 1500.00, labValue: 0.00, status: 'Regular' },
-  // ];
+interface Payment {
+  term: string;
+  due: number;
+  paid: number;
+  balance: number;
+}
 
-  const courseData = data.courses;
+interface TuitionDataProps {
+  data: {
+    courses: Course[];
+  };
+}
 
-  const paymentData = [
-    { term: 'Pre-Midterm', due: 1500.00, paid: 1500.00, balance: 1500.00 },
-    { term: 'Midterm', due: 1500.00, paid: 1500.00, balance: 1500.00 },
-    { term: 'Pre-Final', due: 1500.00, paid: 1500.00, balance: 1500.00 },
-    { term: 'Final', due: 1500.00, paid: 1500.00, balance: 1500.00 },
+interface PermitData {
+  name: string;
+  college: string;
+  semester: string;
+  schoolYear: string;
+  courses: {
+    code: string;
+    section: string;
+  }[];
+}
+
+const TuitionData: React.FC<TuitionDataProps> = ({ data }) => {
+  const { data: session } = useSession();
+  const { toast } = useToast();
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const courseData: Course[] = data.courses;
+
+  const paymentData: Payment[] = [
+    { term: "Pre-Midterm", due: 1500.0, paid: 1500.0, balance: 1500.0 },
+    { term: "Midterm", due: 1500.0, paid: 1500.0, balance: 1500.0 },
+    { term: "Pre-Final", due: 1500.0, paid: 1500.0, balance: 1500.0 },
+    { term: "Final", due: 1500.0, paid: 1500.0, balance: 1500.0 },
   ];
+
+  const handleRequestPermit = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const permitData: PermitData = {
+        name: session?.user?.fullname as string,
+        college: session?.user?.course as string,
+        semester: '1st',
+        schoolYear: '2024-2025',
+        courses: courseData.map(course => ({
+          code: course.courseCode,
+          section: 'C20'
+        }))
+      };
+  
+      const response = await fetch('/api/send-permit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(permitData)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to send permit request');
+      }
+  
+      toast({
+        title: "Success",
+        description: "Exam permit has been sent to your email.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send permit request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (data && data?.courses?.length) {
     return (
       <Card className="w-full">
         <CardHeader className="text-center">
           <CardTitle>1ST Semester</CardTitle>
           <div className="text-blue-800 font-bold mt-2">
-            {/* [18103903] CARANAO-O, CYRUS NOEL - BS CPE */}
-            { session && session.user && session.user.fullname + ' - ' + session.user.course}
+            {session?.user && `${session.user.fullname} - ${session.user.course}`}
           </div>
         </CardHeader>
         <CardContent>
@@ -63,19 +127,21 @@ const TuitionData = ({data}) => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {courseData && courseData.map((course, index) => (
+                      {courseData.map((course, index) => (
                         <TableRow key={index}>
                           <TableCell>{course.courseCode}</TableCell>
                           <TableCell>{course.academicUnits}</TableCell>
                           <TableCell>{course.lecValue.toFixed(2)}</TableCell>
                           <TableCell>{course.labValue.toFixed(2)}</TableCell>
-                          <TableCell className="text-green-600">{course.status}</TableCell>
+                          <TableCell className="text-green-600">
+                            {course.status}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
-                
+
                 <div className="bg-blue-900 text-white p-4 rounded-lg">
                   <h4 className="font-bold mb-2">Total Course Fee</h4>
                   <div className="space-y-1 text-sm">
@@ -86,7 +152,7 @@ const TuitionData = ({data}) => {
                 </div>
               </div>
             </div>
-  
+
             {/* Payment Schedule Section */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <div className="lg:col-span-3">
@@ -108,32 +174,45 @@ const TuitionData = ({data}) => {
                         <TableCell>{payment.paid.toFixed(2)}</TableCell>
                         <TableCell>{payment.balance.toFixed(2)}</TableCell>
                         <TableCell>
-                          <Button 
+                          <Button
                             className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
-                            disabled={payment.balance > 0}
+                            onClick={handleRequestPermit}
+                            disabled={isLoading}
                           >
-                            Request Permit
+                            {isLoading ? "Sending..." : "Request Permit"}
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
                       <TableCell className="font-bold">Total</TableCell>
-                      <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.due, 0).toFixed(2)}</TableCell>
-                      <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.paid, 0).toFixed(2)}</TableCell>
-                      <TableCell className="font-bold">{paymentData.reduce((sum, p) => sum + p.balance, 0).toFixed(2)}</TableCell>
+                      <TableCell className="font-bold">
+                        {paymentData
+                          .reduce((sum, p) => sum + p.due, 0)
+                          .toFixed(2)}
+                      </TableCell>
+                      <TableCell className="font-bold">
+                        {paymentData
+                          .reduce((sum, p) => sum + p.paid, 0)
+                          .toFixed(2)}
+                      </TableCell>
+                      <TableCell className="font-bold">
+                        {paymentData
+                          .reduce((sum, p) => sum + p.balance, 0)
+                          .toFixed(2)}
+                      </TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </div>
-  
+
               <div className="space-y-4">
                 <div className="bg-blue-900 text-white p-4 rounded-lg">
                   <div className="font-bold">Total Payments:</div>
                   <div>0.00</div>
                 </div>
-                
+
                 <div className="bg-red-500 text-white p-4 rounded-lg">
                   <div className="font-bold">Remaining Balance</div>
                   <div>10.00</div>
@@ -145,6 +224,8 @@ const TuitionData = ({data}) => {
       </Card>
     );
   }
+
+  return null;
 };
 
 export default TuitionData;

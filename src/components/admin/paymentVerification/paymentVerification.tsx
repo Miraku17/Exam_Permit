@@ -168,7 +168,7 @@ const PaymentVerificationTable = ({
             </DialogHeader>
             <div className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden">
               <img 
-                src={selectedImage || ''} 
+                src={selectedImage || null } 
                 alt="Proof of Payment" 
                 className="object-contain w-full h-full"
               />
