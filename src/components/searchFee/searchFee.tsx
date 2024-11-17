@@ -58,7 +58,7 @@ const SearchFee = ({handleSearch, error, setError}: any) => {
                     </SelectItem>
                     <SelectItem value="1st">1st Sem</SelectItem>
                     <SelectItem value="2nd">2nd Sem</SelectItem>
-                    <SelectItem value="midyear">Midyear</SelectItem>
+                    {/* <SelectItem value="midyear">Midyear</SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>

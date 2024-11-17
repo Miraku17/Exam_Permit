@@ -32,15 +32,15 @@ export interface ISemester {
 
 
 export interface IPayment {
-  givenName: string;
-  familyName: string;
+  transactionId: string;
+  fullName: string;
   mobileNumber: string;
   emailAddress: string;
   referenceNumber: string;
-  paymentGateway: 'GCash';
-  proofOfPaymentUrl: string;
+  paymentGateway: "GCash";
   amount: number;
-  status: 'pending' | 'verified' | 'rejected';
-  createdAt: Date;
-  updatedAt: Date;
+  proofOfPaymentUrl: string;
+  status: "pending" | "verified" | "rejected";
+  createdAt?: Date;
+  updatedAt?: Date;
 }
