@@ -13,7 +13,9 @@ const PaymentInstructions = () => {
   return (
     <Card className="w-full lg:w-[650px]">
       <CardHeader>
-        <CardTitle className="text-xl text-primaryBlue">Payment of Tuition Fees</CardTitle>
+        <CardTitle className="text-xl text-primaryBlue">
+          Payment of Tuition Fees
+        </CardTitle>
         <CardDescription>
           All payment shall be made at any accredited payment facilities below:
         </CardDescription>
@@ -27,12 +29,12 @@ const PaymentInstructions = () => {
             alt="GCash Logo"
             className="w-24 lg:w-28 h-24 lg:h-28 mb-4"
           />
-          <h2 className="text-xl font-bold">UNO-R</h2>
-          <p className="text-lg">09123455123</p>
-          <Button variant="link" className="mt-1">
+          <h2 className="text-xl font-bold">Joanna Kate P.</h2>
+          <p className="text-lg">09390161258</p>
+          {/* <Button variant="link" className="mt-1">
             <QrCode className="mr-2 h-4 w-4" />
             View QR Code here
-          </Button>
+          </Button> */}
         </div>
 
         {/* Payment Instructions */}
@@ -49,12 +51,14 @@ const PaymentInstructions = () => {
                 <li>Reference Number (if required)</li>
               </ul>
             </li>
-            <li>Double-check that the GCash number matches: 09123455123</li>
+            <li>Double-check that the GCash number matches: 09390161258</li>
             <li>
               For faster transaction, you can scan the QR code by clicking "View
               QR Code here"
             </li>
-            <li>Review all payment details before confirming the transaction</li>
+            <li>
+              Review all payment details before confirming the transaction
+            </li>
             <li>
               Keep your transaction receipt/reference number for your records
             </li>
