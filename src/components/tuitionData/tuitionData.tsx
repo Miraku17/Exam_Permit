@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -18,46 +18,50 @@ interface Course {
   lecValue: number;
   labValue: number;
   status: string;
+  totals: any;
 }
 
-interface Payment {
+interface Term {
   term: string;
-  due: number;
+  dueAmount: number;
   paid: number;
   balance: number;
+  _id: string;
+}
+
+interface Semester {
+  semester: number;
+  terms: Term[];
+  totalPayments: number;
+  remainingBalance: number;
+  _id: string;
+}
+
+interface StudentTuition {
+  _id: string;
+  userId: string;
+  semesters: Semester[];
 }
 
 interface TuitionDataProps {
   data: {
     courses: Course[];
+    totals: [];
   };
+  studentTuition?: StudentTuition;
 }
 
-interface PermitData {
-  name: string;
-  college: string;
-  semester: string;
-  schoolYear: string;
-  courses: {
-    code: string;
-    section: string;
-  }[];
-}
-
-const TuitionData: React.FC<TuitionDataProps> = ({ data }) => {
+const TuitionData: React.FC<TuitionDataProps> = ({ data, studentTuition }) => {
   const { data: session } = useSession();
   const { toast } = useToast();
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const courseData: Course[] = data.courses;
+  const courseData: Course[] = data?.courses || [];
+  const currentSemester = studentTuition?.semesters[0]; // Get first semester
 
-  const paymentData: Payment[] = [
-    { term: "Pre-Midterm", due: 1500.0, paid: 1500.0, balance: 1500.0 },
-    { term: "Midterm", due: 1500.0, paid: 1500.0, balance: 1500.0 },
-    { term: "Pre-Final", due: 1500.0, paid: 1500.0, balance: 1500.0 },
-    { term: "Final", due: 1500.0, paid: 1500.0, balance: 1500.0 },
-  ];
+  useEffect(() => {
+    console.log("Student Tuition Data:", studentTuition);
+  }, [studentTuition]);
 
   const handleRequestPermit = async (): Promise<void> => {
     setIsLoading(true);
@@ -65,26 +69,26 @@ const TuitionData: React.FC<TuitionDataProps> = ({ data }) => {
       const permitData: PermitData = {
         name: session?.user?.fullname as string,
         college: session?.user?.course as string,
-        semester: '1st',
-        schoolYear: '2024-2025',
-        courses: courseData.map(course => ({
+        semester: "1st",
+        schoolYear: "2024-2025",
+        courses: courseData.map((course) => ({
           code: course.courseCode,
-          section: 'C20'
-        }))
+          section: "C20",
+        })),
       };
-  
-      const response = await fetch('/api/send-permit', {
-        method: 'POST',
+
+      const response = await fetch("/api/send-permit", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(permitData)
+        body: JSON.stringify(permitData),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to send permit request');
+        throw new Error("Failed to send permit request");
       }
-  
+
       toast({
         title: "Success",
         description: "Exam permit has been sent to your email.",
@@ -106,7 +110,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({ data }) => {
         <CardHeader className="text-center">
           <CardTitle>1ST Semester</CardTitle>
           <div className="text-blue-800 font-bold mt-2">
-            {session?.user && `${session.user.fullname} - ${session.user.course}`}
+            {session?.user &&
+              `${session.user.fullname} - ${session.user.course}`}
           </div>
         </CardHeader>
         <CardContent>
@@ -145,80 +150,128 @@ const TuitionData: React.FC<TuitionDataProps> = ({ data }) => {
                 <div className="bg-blue-900 text-white p-4 rounded-lg">
                   <h4 className="font-bold mb-2">Total Course Fee</h4>
                   <div className="space-y-1 text-sm">
-                    <div>Lecture: 10,000</div>
-                    <div>Laboratory: 10,000</div>
-                    <div className="font-bold">Total: 17,000</div>
+                    <div>Lecture: {data.totals?.totalLecture}</div>
+                    <div>Laboratory: {data.totals?.totalLaboratory}</div>
+                    <div className="font-bold">
+                      Total: {data.totals?.grandTotal}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Payment Schedule Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-              <div className="lg:col-span-3">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Term</TableHead>
-                      <TableHead>Due*</TableHead>
-                      <TableHead>Paid</TableHead>
-                      <TableHead>Balance</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paymentData.map((payment, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{payment.term}</TableCell>
-                        <TableCell>{payment.due.toFixed(2)}</TableCell>
-                        <TableCell>{payment.paid.toFixed(2)}</TableCell>
-                        <TableCell>{payment.balance.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
-                            onClick={handleRequestPermit}
-                            disabled={isLoading}
-                          >
-                            {isLoading ? "Sending..." : "Request Permit"}
-                          </Button>
-                        </TableCell>
+            {currentSemester && (
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div className="lg:col-span-3">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Term</TableHead>
+                        <TableHead>Due Amount</TableHead>
+                        <TableHead>Paid</TableHead>
+                        <TableHead>Balance</TableHead>
+                        <TableHead>Action</TableHead>
                       </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell className="font-bold">Total</TableCell>
-                      <TableCell className="font-bold">
-                        {paymentData
-                          .reduce((sum, p) => sum + p.due, 0)
-                          .toFixed(2)}
-                      </TableCell>
-                      <TableCell className="font-bold">
-                        {paymentData
-                          .reduce((sum, p) => sum + p.paid, 0)
-                          .toFixed(2)}
-                      </TableCell>
-                      <TableCell className="font-bold">
-                        {paymentData
-                          .reduce((sum, p) => sum + p.balance, 0)
-                          .toFixed(2)}
-                      </TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-blue-900 text-white p-4 rounded-lg">
-                  <div className="font-bold">Total Payments:</div>
-                  <div>0.00</div>
+                    </TableHeader>
+                    <TableBody>
+                      {currentSemester.terms.map((term, index) => (
+                        <TableRow key={term._id}>
+                          <TableCell>{term.term}</TableCell>
+                          <TableCell>
+                            ₱
+                            {term.dueAmount.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            ₱
+                            {term.paid.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            ₱
+                            {term.balance.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
+                              onClick={handleRequestPermit}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? "Sending..." : "Request Permit"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell className="font-bold">Total</TableCell>
+                        <TableCell className="font-bold">
+                          ₱
+                          {currentSemester.terms
+                            .reduce((sum, term) => sum + term.dueAmount, 0)
+                            .toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                        </TableCell>
+                        <TableCell className="font-bold">
+                          ₱
+                          {currentSemester.totalPayments.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+                        </TableCell>
+                        <TableCell className="font-bold">
+                          ₱
+                          {currentSemester.remainingBalance.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+                        </TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
 
-                <div className="bg-red-500 text-white p-4 rounded-lg">
-                  <div className="font-bold">Remaining Balance</div>
-                  <div>10.00</div>
+                <div className="space-y-4">
+                  <div className="bg-blue-900 text-white p-4 rounded-lg">
+                    <div className="font-bold">Total Payments:</div>
+                    <div>
+                      ₱
+                      {currentSemester.totalPayments.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="bg-red-500 text-white p-4 rounded-lg">
+                    <div className="font-bold">Remaining Balance</div>
+                    <div>
+                      ₱
+                      {currentSemester.remainingBalance.toLocaleString(
+                        undefined,
+                        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
             semester: sem,
             year: year,
             courses: semester.courses,
+            totals: semester.totals,
         }, { status: 200 })
     } catch (error) {
         console.error("Payment submission error:", error);
