@@ -7,6 +7,7 @@ import TuitionData from "@/components/tuitionData/tuitionData";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import PaymentVerificationTable from "@/components/admin/paymentVerification/paymentVerification";
+import { StudentTuition } from "@/models/studentTuition";
 
 interface PaymentHistory {
   transactionId: string;
@@ -24,44 +25,81 @@ interface ApiResponse {
   error?: string;
 }
 
+interface StudentTuitionData {
+  userId: string;
+  semesters: Array<{
+    semester: number;
+    terms: Array<{
+      term: string;
+      dueAmount: number;
+      paid: number;
+      balance: number;
+    }>;
+    totalPayments: number;
+    remainingBalance: number;
+  }>;
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession({
     required: true,
   });
 
   const [tuitionData, setTuitionData] = useState<Object[]>([]);
+  const [studentTuition, setStudentTuition] = useState<StudentTuitionData | null>(null);
   const [error, setError] = useState("");
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+
   useEffect(() => {
-    const fetchPaymentHistory = async () => {
+    console.log("Current session:", session);
+  }, [session]);
+
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const endpoint =
-          session?.user?.role === "admin"
-            ? "/api/payments"
-            : "/api/payments/history";
-        const response = await axios.get<ApiResponse>(endpoint);
+        
+        // Fetch payment history
+        const paymentResponse = await axios.get<ApiResponse>("/api/payments/history");
+        
+        // Fetch student tuition if user ID exists
+        let tuitionResponse = null;
+        if (session?.user?._id) {
+          try {
+            tuitionResponse = await axios.get<StudentTuitionData>(
+              `/api/student-tuition?userId=${session?.user?._id}`
+            );
+            if (tuitionResponse) {
+              console.log("Tuition response data", tuitionResponse.data);
+              setStudentTuition(tuitionResponse.data);
+            }
+          } catch (tuitionError) {
+            console.error("Error fetching tuition:", tuitionError);
+            // Don't set error here to allow payment history to still show
+          }
+        }
 
-        if (response.data.success && response.data.data) {
-          setPaymentHistory(response.data.data);
+        if (paymentResponse.data.success && paymentResponse.data.data) {
+          setPaymentHistory(paymentResponse.data.data);
           setError("");
         } else {
-          setError(response.data.error || "Failed to load payments");
+          setError(paymentResponse.data.error || "Failed to load payments");
         }
+
       } catch (err) {
-        console.error("Error fetching payments:", err);
-        setError("Failed to load payments");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data");
       } finally {
         setIsLoading(false);
       }
     };
 
     if (status === "authenticated") {
-      fetchPaymentHistory();
+      fetchData();
     }
-  }, [status, session?.user?.role]);
+  }, [status, session?.user?._id]);
 
   const handleAcceptPayment = async (transactionId: string) => {
     try {
@@ -114,12 +152,7 @@ export default function DashboardPage() {
   const getCourseCode = (courseString: string) => {
     const regex = /\(([^)]+)\)/;
     const match = courseString?.match(regex);
-
-    if (match) {
-      return match[1];
-    }
-
-    return null;
+    return match ? match[1] : null;
   };
 
   const handleSearch = async (term: string, year: string) => {
@@ -167,16 +200,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col justify-center gap-12">
+    <div className="flex flex-col justify-center gap-12 p-4">
+ 
+
       <SearchFee
         handleSearch={handleSearch}
         error={error}
         setError={setError}
       />
-      <TuitionData data={tuitionData} />
+      <TuitionData data={tuitionData} studentTuition={studentTuition} />
 
       <div className="mt-8">
-        {/* <h2 className="text-xl font-semibold mb-4">Payment History</h2> */}
         {isLoading ? (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>

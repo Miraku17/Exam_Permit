@@ -16,7 +16,18 @@ const SemesterSchema = new Schema<ISemester>({
     type: Number,
     required: true
   },
-  courses: [CourseSchema]
+  courses: [CourseSchema],
+  totals: {
+    totalLecture: Number,
+    totalLaboratory: Number,
+    grandTotal: Number,
+    termPayments: {
+      preMidterm: Number,
+      midterm: Number,
+      preFinal: Number,
+      final: Number,
+    },
+  },
 });
 
 export const Semester = models.Semester || model<ISemester>('Semester', SemesterSchema);

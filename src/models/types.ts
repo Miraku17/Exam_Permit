@@ -19,8 +19,20 @@ export interface ICourse {
   status: "Regular" | "Irregular";
   terms: ITerm[];
   totalCourseFee: ITotalCourseFee;
-  // totalPayments: number;
-  // remainingBalance: number;
+  totalPayments: number;
+  remainingBalance: number;
+}
+
+export interface ISemesterTotals {
+  totalLecture: number;
+  totalLaboratory: number;
+  grandTotal: number;
+  termPayments: {
+    preMidterm: number;
+    midterm: number;
+    preFinal: number;
+    final: number;
+  };
 }
 
 export interface ISemester {
@@ -28,6 +40,8 @@ export interface ISemester {
   semester: 1 | 2;
   year: number;
   courses: ICourse[];
+  totals: ISemesterTotals;
+
 }
 
 
