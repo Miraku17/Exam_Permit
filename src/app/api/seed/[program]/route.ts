@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { Semester } from "@/models/Semester";
 
@@ -172,7 +172,7 @@ function createCourseStructure(courseCode: string) {
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { program: string } }
 ) {
   try {
