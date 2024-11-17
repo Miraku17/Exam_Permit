@@ -171,9 +171,15 @@ function createCourseStructure(courseCode: string) {
   };
 }
 
+type RouteContext = {
+  params: {
+    program: string;
+  };
+};
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { program: string } }
+  { params }: RouteContext
 ) {
   try {
     await connectDB();
