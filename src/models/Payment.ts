@@ -4,15 +4,15 @@ import { IPayment } from "./types";
 
 const paymentSchema = new Schema<IPayment>(
   {
-    givenName: {
+    transactionId: {
       type: String,
-      required: [true, "Given name is required"],
-      trim: true,
+      required: true,
+      unique: true,
+      index: true,
     },
-    familyName: {
+    fullName: {
       type: String,
-      required: [true, "Family name is required"],
-      trim: true,
+      required: [true, "Full name is required"],
     },
     mobileNumber: {
       type: String,

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Payment from "@/models/Payment";
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary } from "cloudinary";
+import crypto from "crypto";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -10,10 +11,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+function generateTransactionId() {
+  return `TRX${Date.now().toString(36)}${crypto.randomBytes(2).toString('hex')}`.toUpperCase();
+}
+
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const formData = await req.formData();
+
+    // Generate transaction ID
+    const transactionId = generateTransactionId();
 
     // Handle image upload
     const proofFile = formData.get("proofOfPayment") as File;
@@ -26,18 +34,20 @@ export async function POST(req: NextRequest) {
 
       // Upload to Cloudinary
       const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          {
-            folder: "payment-proofs",
-            resource_type: "auto",
-            allowed_formats: ["jpg", "jpeg", "png", "pdf"],
-            max_file_size: 5000000, // 5MB
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(buffer);
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: "payment-proofs",
+              resource_type: "auto",
+              allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+              max_file_size: 5000000, // 5MB
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          )
+          .end(buffer);
       });
 
       // @ts-ignore (result will have secure_url)
@@ -49,8 +59,8 @@ export async function POST(req: NextRequest) {
     const amount = parseFloat(rawAmount as string);
 
     const paymentData = {
-      givenName: (formData.get("givenName") as string)?.trim(),
-      familyName: (formData.get("familyName") as string)?.trim(),
+      transactionId,
+      fullName: (formData.get("fullName") as string)?.trim(),
       mobileNumber: (formData.get("mobileNumber") as string)?.trim(),
       emailAddress: (formData.get("email") as string)?.trim().toLowerCase(),
       referenceNumber: (formData.get("referenceNumber") as string)?.trim(),
@@ -67,6 +77,7 @@ export async function POST(req: NextRequest) {
       {
         message: "Payment submitted successfully",
         payment: payment.toJSON(),
+        transactionId,
       },
       { status: 201 }
     );
@@ -80,10 +91,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-// Configure the API route to handle larger file uploads
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
