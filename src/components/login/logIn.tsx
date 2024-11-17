@@ -107,8 +107,9 @@ export default function LoginPage() {
             redirect: false,
           });
 
+          if (res?.error)
+            setError(res?.error);
           console.log(res);
-          setError(res?.error);
         } catch (error) {
           console.log(error);
           return;
