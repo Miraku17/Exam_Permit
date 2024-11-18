@@ -4,6 +4,10 @@ import { IPayment } from "./types";
 
 const paymentSchema = new Schema<IPayment>(
   {
+    studentId: {
+      type: String,
+      required: true,
+    },
     transactionId: {
       type: String,
       required: true,

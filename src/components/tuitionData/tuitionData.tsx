@@ -51,13 +51,18 @@ interface TuitionDataProps {
   studentTuition?: StudentTuition;
 }
 
-const TuitionData: React.FC<TuitionDataProps> = ({ data, studentTuition }) => {
+const TuitionData: React.FC<TuitionDataProps> = ({
+  data,
+  studentTuition,
+  selectedTerm,
+}) => {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const courseData: Course[] = data?.courses || [];
-  const currentSemester = studentTuition?.semesters[0]; // Get first semester
+  const semesterIndex = selectedTerm === "1st" ? 0 : 1;
+  const currentSemester = studentTuition?.semesters[semesterIndex];
 
   useEffect(() => {
     console.log("Student Tuition Data:", studentTuition);
@@ -150,10 +155,12 @@ const TuitionData: React.FC<TuitionDataProps> = ({ data, studentTuition }) => {
                 <div className="bg-blue-900 text-white p-4 rounded-lg">
                   <h4 className="font-bold mb-2">Total Course Fee</h4>
                   <div className="space-y-1 text-sm">
-                    <div>Lecture: {data.totals?.totalLecture}</div>
-                    <div>Laboratory: {data.totals?.totalLaboratory}</div>
+                    <div>Lecture: ₱{data.totals?.totalLecture.toFixed(2)}</div>
+                    <div>
+                      Laboratory: ₱{data.totals?.totalLaboratory.toFixed(2)}
+                    </div>
                     <div className="font-bold">
-                      Total: {data.totals?.grandTotal}
+                      Total: ₱{data.totals?.grandTotal.toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -203,7 +210,7 @@ const TuitionData: React.FC<TuitionDataProps> = ({ data, studentTuition }) => {
                             <Button
                               className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
                               onClick={handleRequestPermit}
-                              disabled={isLoading}
+                              disabled={true}
                             >
                               {isLoading ? "Sending..." : "Request Permit"}
                             </Button>

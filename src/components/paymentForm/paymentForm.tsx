@@ -130,6 +130,8 @@ const PaymentForm = () => {
         
         formData.set("fullName", session?.user?.fullname || '');
         formData.set("email", session?.user?.email || '');
+        formData.set("studentId", session?.user?._id || '');
+
 
         if (selectedFile) {
           formData.set("proofOfPayment", selectedFile);
