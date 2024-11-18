@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
 
     const paymentData = {
       transactionId,
+      studentId: (formData.get("studentId") as string)?.trim(),
       fullName: (formData.get("fullName") as string)?.trim(),
       mobileNumber: (formData.get("mobileNumber") as string)?.trim(),
       emailAddress: (formData.get("email") as string)?.trim().toLowerCase(),

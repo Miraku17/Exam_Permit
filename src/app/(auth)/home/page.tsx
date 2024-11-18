@@ -46,11 +46,12 @@ export default function DashboardPage() {
   });
 
   const [tuitionData, setTuitionData] = useState<Object[]>([]);
-  const [studentTuition, setStudentTuition] = useState<StudentTuitionData | null>(null);
+  const [studentTuition, setStudentTuition] =
+    useState<StudentTuitionData | null>(null);
   const [error, setError] = useState("");
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [selectedTerm, setSelectedTerm] = useState("");
 
   useEffect(() => {
     console.log("Current session:", session);
@@ -60,10 +61,12 @@ export default function DashboardPage() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
+
         // Fetch payment history
-        const paymentResponse = await axios.get<ApiResponse>("/api/payments/history");
-        
+        const paymentResponse = await axios.get<ApiResponse>(
+          "/api/payments/history"
+        );
+
         // Fetch student tuition if user ID exists
         let tuitionResponse = null;
         if (session?.user?._id) {
@@ -87,7 +90,6 @@ export default function DashboardPage() {
         } else {
           setError(paymentResponse.data.error || "Failed to load payments");
         }
-
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load data");
@@ -102,6 +104,8 @@ export default function DashboardPage() {
   }, [status, session?.user?._id]);
 
   const handleAcceptPayment = async (transactionId: string) => {
+
+    console.log("Trasaction ID", transactionId);
     try {
       const response = await axios.post<ApiResponse>(
         `/api/payments/${transactionId}/accept`
@@ -156,6 +160,7 @@ export default function DashboardPage() {
   };
 
   const handleSearch = async (term: string, year: string) => {
+    setSelectedTerm(term);
     const courseCode = getCourseCode(session?.user?.course);
     try {
       const response = await axios.get(
@@ -201,15 +206,16 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col justify-center gap-12 p-4">
- 
-
       <SearchFee
         handleSearch={handleSearch}
         error={error}
         setError={setError}
       />
-      <TuitionData data={tuitionData} studentTuition={studentTuition} />
-
+      <TuitionData
+        data={tuitionData}
+        studentTuition={studentTuition}
+        selectedTerm={selectedTerm}
+      />
       <div className="mt-8">
         {isLoading ? (
           <div className="flex justify-center items-center py-8">

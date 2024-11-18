@@ -46,6 +46,7 @@ export interface ISemester {
 
 
 export interface IPayment {
+  studentId: string,
   transactionId: string;
   fullName: string;
   mobileNumber: string;
