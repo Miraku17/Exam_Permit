@@ -41,8 +41,7 @@ const PaymentInstructions = () => {
         <div className="space-y-3">
           <h3 className="font-bold">How to Pay Your Tuition Using GCash:</h3>
           <ol className="list-decimal list-outside ml-5 space-y-2 text-sm text-muted-foreground">
-            <li>Open your GCash app and select "Pay Bills"</li>
-            <li>Search for or select "UNO-R" from the billers list</li>
+            <li>Open your GCash app and select "Send Money"</li>
             <li>
               Enter the following payment details:
               <ul className="list-disc ml-6 mt-1">
@@ -52,10 +51,7 @@ const PaymentInstructions = () => {
               </ul>
             </li>
             <li>Double-check that the GCash number matches: 09390161258</li>
-            <li>
-              For faster transaction, you can scan the QR code by clicking "View
-              QR Code here"
-            </li>
+
             <li>
               Review all payment details before confirming the transaction
             </li>

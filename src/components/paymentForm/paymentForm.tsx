@@ -327,7 +327,7 @@ const PaymentForm = () => {
                   select the correct payment gateway.
                 </li>
                 <li>
-                  Proof of Payment: Upload a clear image or PDF as proof of
+                  Proof of Payment: Upload a clear image as proof of
                   payment.
                 </li>
                 <li>

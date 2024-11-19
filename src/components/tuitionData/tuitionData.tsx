@@ -64,6 +64,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({
   const semesterIndex = selectedTerm === "1st" ? 0 : 1;
   const currentSemester = studentTuition?.semesters[semesterIndex];
 
+  const title = selectedTerm === "1st"? "1st Semester" : "2nd Semester";
+
   useEffect(() => {
     console.log("Student Tuition Data:", studentTuition);
   }, [studentTuition]);
@@ -113,7 +115,7 @@ const TuitionData: React.FC<TuitionDataProps> = ({
     return (
       <Card className="w-full">
         <CardHeader className="text-center">
-          <CardTitle>1ST Semester</CardTitle>
+          <CardTitle>{title}</CardTitle>
           <div className="text-blue-800 font-bold mt-2">
             {session?.user &&
               `${session.user.fullname} - ${session.user.course}`}
