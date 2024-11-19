@@ -122,7 +122,7 @@ async function generatePermitPDF(studentData: StudentData) {
 
 export async function POST(request: Request) {
   try {
-    const { name, college, semester, schoolYear, courses } = await request.json();
+    const { name, college, semester, schoolYear, courses, email } = await request.json();
 
     const studentData: StudentData = {
       name: name || 'N/A',
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: 'zhaztedv@gmail.com',
+      to: email,
       subject: 'Examination Permit',
       text: 'Good day! Please find attached your examination permit.',
       attachments: [

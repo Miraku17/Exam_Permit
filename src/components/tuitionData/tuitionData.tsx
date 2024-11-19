@@ -18,7 +18,12 @@ interface Course {
   lecValue: number;
   labValue: number;
   status: string;
-  totals: any;
+}
+
+interface Totals {
+  totalLecture: number;
+  totalLaboratory: number;
+  grandTotal: number;
 }
 
 interface Term {
@@ -46,9 +51,10 @@ interface StudentTuition {
 interface TuitionDataProps {
   data: {
     courses: Course[];
-    totals: [];
+    totals: Totals;
   };
   studentTuition?: StudentTuition;
+  selectedTerm: "1st" | "2nd";
 }
 
 const TuitionData: React.FC<TuitionDataProps> = ({
@@ -70,13 +76,19 @@ const TuitionData: React.FC<TuitionDataProps> = ({
     console.log("Student Tuition Data:", studentTuition);
   }, [studentTuition]);
 
-  const handleRequestPermit = async (): Promise<void> => {
+  const canRequestPermit = (term: Term) => {
+    return term.balance === 0;
+  };
+
+  const handleRequestPermit = async (term: Term): Promise<void> => {
     setIsLoading(true);
     try {
-      const permitData: PermitData = {
+      const permitData = {
+        email: session?.user?.email as string,
         name: session?.user?.fullname as string,
         college: session?.user?.course as string,
-        semester: "1st",
+        semester: selectedTerm,
+        term: term.term,
         schoolYear: "2024-2025",
         courses: courseData.map((course) => ({
           code: course.courseCode,
@@ -211,9 +223,9 @@ const TuitionData: React.FC<TuitionDataProps> = ({
                           <TableCell>
                             <Button
                               className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
-                              onClick={handleRequestPermit}
-                              disabled={true}
-                            >
+                              onClick={() => handleRequestPermit(term)}
+                              disabled={!canRequestPermit(term)}
+                              >
                               {isLoading ? "Sending..." : "Request Permit"}
                             </Button>
                           </TableCell>
