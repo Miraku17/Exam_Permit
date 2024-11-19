@@ -9,19 +9,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   
   const navigationLinks = [
     { href: "/home", label: "Home" },
     { href: "/payment", label: "Payment" },
     { href: "/history", label: "History" },
   ];
+
+  const isActiveRoute = (href) => pathname === href;
 
   return (
     <nav className="bg-[#1a237e] text-white shadow-lg">
@@ -44,7 +46,11 @@ const Navbar = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                className="hover:text-gray-300 transition-colors font-bold"
+                className={`transition-colors font-bold ${
+                  isActiveRoute(link.href)
+                    ? "text-yellow-300 border-b-2 border-yellow-300"
+                    : "hover:text-gray-300"
+                }`}
               >
                 {link.label}
               </Link>
@@ -63,16 +69,14 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  { session && session.user && (
+                  {session && session.user && (
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">{ session.user.fullname }</span>
+                      <span className="text-sm font-medium">{session.user.fullname}</span>
                       <span className="text-xs text-gray-300">
-                        {/* 1st Year Student - BS CPE */}
-                        { session.user.yearLevel + ' Student - ' + session.user.course }
+                        {session.user.yearLevel + ' Student - ' + session.user.course}
                       </span>
                     </div>
-                  )
-                  }
+                  )}
                 </div>
               </PopoverTrigger>
               <PopoverContent className="w-56">
@@ -89,7 +93,7 @@ const Navbar = () => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-sm text-red-500 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => {signOut()}}
+                      onClick={() => signOut()}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -123,7 +127,11 @@ const Navbar = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block px-3 py-2 rounded-md hover:bg-blue-900 transition-colors"
+                  className={`block px-3 py-2 rounded-md transition-colors ${
+                    isActiveRoute(link.href)
+                      ? "bg-blue-900 text-yellow-300"
+                      : "hover:bg-blue-900"
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -139,14 +147,16 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  <div className="flex flex-col flex-1">
-                    <span className="text-sm font-medium">
-                      Cyrus Noel Carano-o
-                    </span>
-                    <span className="text-xs text-gray-300">
-                      1st Year Student - BS CPE
-                    </span>
-                  </div>
+                  {session && session.user && (
+                    <div className="flex flex-col flex-1">
+                      <span className="text-sm font-medium">
+                        {session.user.fullname}
+                      </span>
+                      <span className="text-xs text-gray-300">
+                        {session.user.yearLevel + ' Student - ' + session.user.course}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {/* Mobile Profile Actions */}
                 <div className="mt-3 space-y-2">
@@ -161,7 +171,7 @@ const Navbar = () => {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start text-red-400 hover:text-red-400 hover:bg-blue-900"
-                    onClick={() => {signOut()}}
+                    onClick={() => signOut()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
