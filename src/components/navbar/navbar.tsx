@@ -1,5 +1,4 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Menu, X, LogOut, KeyRound } from "lucide-react";
 import {
   Popover,
@@ -7,23 +6,38 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 
+interface NavLink {
+  href: string;
+  label: string;
+}
+
+interface UserSession {
+  user?: {
+    fullname: string;
+    yearLevel: string;
+    course: string;
+  };
+}
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession() as { 
+    data: UserSession | null;
+    status: "loading" | "authenticated" | "unauthenticated";
+  };
   const pathname = usePathname();
   
-  const navigationLinks = [
+  const navigationLinks: NavLink[] = [
     { href: "/home", label: "Home" },
     { href: "/payment", label: "Payment" },
     { href: "/history", label: "History" },
   ];
 
-  const isActiveRoute = (href) => pathname === href;
+  const isActiveRoute = (href: string): boolean => pathname === href;
 
   return (
     <nav className="bg-[#1a237e] text-white shadow-lg">
@@ -69,7 +83,7 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  {session && session.user && (
+                  {session?.user && (
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{session.user.fullname}</span>
                       <span className="text-xs text-gray-300">
@@ -147,7 +161,7 @@ const Navbar = () => {
                       className="h-10 w-10 rounded-full"
                     />
                   </div>
-                  {session && session.user && (
+                  {session?.user && (
                     <div className="flex flex-col flex-1">
                       <span className="text-sm font-medium">
                         {session.user.fullname}
