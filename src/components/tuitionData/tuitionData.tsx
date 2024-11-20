@@ -64,13 +64,16 @@ const TuitionData: React.FC<TuitionDataProps> = ({
 }) => {
   const { data: session } = useSession();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingTerms, setLoadingTerms] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const courseData: Course[] = data?.courses || [];
   const semesterIndex = selectedTerm === "1st" ? 0 : 1;
   const currentSemester = studentTuition?.semesters[semesterIndex];
 
-  const title = selectedTerm === "1st"? "1st Semester" : "2nd Semester";
+  const title = selectedTerm === "1st" ? "1st Semester" : "2nd Semester";
 
   useEffect(() => {
     console.log("Student Tuition Data:", studentTuition);
@@ -81,7 +84,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({
   };
 
   const handleRequestPermit = async (term: Term): Promise<void> => {
-    setIsLoading(true);
+    setLoadingTerms((prev) => ({ ...prev, [term._id]: true }));
+    setIsProcessing(true);
     try {
       const permitData = {
         email: session?.user?.email as string,
@@ -98,15 +102,11 @@ const TuitionData: React.FC<TuitionDataProps> = ({
 
       const response = await fetch("/api/send-permit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(permitData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to send permit request");
-      }
+      if (!response.ok) throw new Error("Failed to send permit request");
 
       toast({
         title: "Success",
@@ -119,7 +119,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoadingTerms((prev) => ({ ...prev, [term._id]: false }));
+      setIsProcessing(false);
     }
   };
 
@@ -224,9 +225,11 @@ const TuitionData: React.FC<TuitionDataProps> = ({
                             <Button
                               className="bg-green-600 hover:bg-green-700 text-xs h-7 px-2"
                               onClick={() => handleRequestPermit(term)}
-                              disabled={!canRequestPermit(term)}
-                              >
-                              {isLoading ? "Sending..." : "Request Permit"}
+                              disabled={!canRequestPermit(term) || isProcessing}
+                            >
+                              {loadingTerms[term._id]
+                                ? "Sending..."
+                                : "Request Permit"}
                             </Button>
                           </TableCell>
                         </TableRow>

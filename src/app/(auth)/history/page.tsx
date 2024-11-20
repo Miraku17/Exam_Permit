@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useEffect, useState } from "react";
 import {
   Table,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 
@@ -58,46 +58,22 @@ const TransactionHistory = () => {
     fetchPayments();
   }, [session?.user?.email]);
 
-  // Calculate total amount
   const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
 
-  // Mobile view renderer
-  const renderMobileCard = (payment: Payment) => (
-    <div key={payment.transactionId} className="bg-white p-4 rounded-lg shadow-sm border mb-4">
-      <div className="flex justify-between items-start mb-2">
-        <div>
-          <p className="font-medium">{payment.transactionId}</p>
-          <p className="text-sm text-gray-500">
-            {new Date(payment.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}
-          </p>
-        </div>
-        <Badge 
-          variant={payment.status === "verified" ? "success" : "secondary"}
-          className={
-            payment.status === "verified" 
-              ? "bg-green-100 text-green-800 hover:bg-green-100" 
-              : payment.status === "rejected"
-              ? "bg-red-100 text-red-800 hover:bg-red-100"
-              : "bg-gray-200 text-gray-800 hover:bg-gray-200"
-          }
-        >
-          {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-        </Badge>
-      </div>
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-sm text-gray-600">{payment.paymentGateway}</span>
-        <span className="font-medium">₱ {payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-      </div>
-    </div>
-  );
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-100 text-green-800 hover:bg-green-100";
+      case "rejected":
+        return "bg-red-100 text-red-800 hover:bg-red-100";
+      default:
+        return "bg-gray-200 text-gray-800 hover:bg-gray-200";
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px]">
+      <div className="flex justify-center items-center min-h-[300px]">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
@@ -105,21 +81,19 @@ const TransactionHistory = () => {
 
   if (error) {
     return (
-      <Card>
+      <Card className="mx-4 lg:mx-0">
         <CardContent className="pt-6">
-          <div className="text-center text-red-500">
-            Error: {error}
-          </div>
+          <div className="text-center text-red-500">{error}</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <Card>
+    <div className="p-4 lg:p-0 max-w-[1200px] mx-auto">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-primaryBlue text-xl">
+          <CardTitle className="text-primaryBlue text-xl text-center lg:text-left">
             TRANSACTION HISTORY
           </CardTitle>
         </CardHeader>
@@ -130,79 +104,106 @@ const TransactionHistory = () => {
             </div>
           ) : (
             <>
-              {/* Desktop view */}
+              {/* Desktop View */}
               <div className="hidden md:block">
                 <ScrollArea className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Transaction ID</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Method</TableHead>
-                        <TableHead>Reference No.</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payments.map((payment) => (
-                        <TableRow key={payment.transactionId}>
-                          <TableCell>{payment.transactionId}</TableCell>
-                          <TableCell>
-                            {new Date(payment.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </TableCell>
-                          <TableCell>{payment.paymentGateway}</TableCell>
-                          <TableCell>{payment.referenceNumber}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={payment.status === "verified" ? "success" : "secondary"}
-                              className={
-                                payment.status === "verified" 
-                                  ? "bg-green-100 text-green-800 hover:bg-green-100" 
-                                  : payment.status === "rejected"
-                                  ? "bg-red-100 text-red-800 hover:bg-red-100"
-                                  : "bg-gray-200 text-gray-800 hover:bg-gray-200"
-                              }
-                            >
-                              {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            ₱ {payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  <div className="min-w-[800px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[180px]">Transaction ID</TableHead>
+                          <TableHead className="w-[120px]">Date</TableHead>
+                          <TableHead className="w-[120px]">Method</TableHead>
+                          <TableHead className="w-[150px]">Reference No.</TableHead>
+                          <TableHead className="w-[100px]">Status</TableHead>
+                          <TableHead className="text-right w-[130px]">Amount</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payments.map((payment) => (
+                          <TableRow key={payment.transactionId}>
+                            <TableCell className="font-medium">
+                              {payment.transactionId}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              {new Date(payment.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </TableCell>
+                            <TableCell>{payment.paymentGateway}</TableCell>
+                            <TableCell>{payment.referenceNumber}</TableCell>
+                            <TableCell>
+                              <Badge className={getStatusStyle(payment.status)}>
+                                {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ₱ {payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="bg-muted">
+                          <TableCell colSpan={5} className="font-semibold">Total</TableCell>
+                          <TableCell className="text-right font-semibold">
+                            ₱ {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </TableCell>
                         </TableRow>
-                      ))}
-                      {/* Total Row */}
-                      <TableRow className="bg-gray-100">
-                        <TableCell colSpan={5} className="font-medium">
-                          Total
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          ₱ {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                  <ScrollBar orientation="horizontal" />
+                      </TableBody>
+                    </Table>
+                  </div>
                 </ScrollArea>
               </div>
 
-              {/* Mobile view */}
-              <div className="md:hidden">
-                <div className="space-y-4">
-                  {payments.map(renderMobileCard)}
-                  {/* Mobile Total */}
-                  <div className="bg-gray-100 p-4 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Total</span>
-                      <span className="font-medium">
-                        ₱ {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
+              {/* Mobile View */}
+              <div className="md:hidden space-y-4">
+                {payments.map((payment) => (
+                  <div key={payment.transactionId} 
+                       className="bg-white p-4 rounded-lg shadow-sm border">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="space-y-1">
+                        <p className="font-medium text-sm break-all">
+                          {payment.transactionId}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(payment.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <Badge className={getStatusStyle(payment.status)}>
+                        {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                      </Badge>
                     </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Method:</span>
+                        <span>{payment.paymentGateway}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Reference:</span>
+                        <span className="text-right break-all">
+                          {payment.referenceNumber}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm font-medium pt-2 border-t">
+                        <span>Amount:</span>
+                        <span>
+                          ₱ {payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex justify-between items-center font-semibold">
+                    <span>Total Amount</span>
+                    <span>
+                      ₱ {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
                 </div>
               </div>
