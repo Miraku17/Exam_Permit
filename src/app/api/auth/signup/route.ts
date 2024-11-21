@@ -6,7 +6,7 @@ import connectDB from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
-    const { fullname, email, password, course, yearLevel } = await request.json();
+    const { fullname, email, password, course, yearLevel, role = 'student' } = await request.json();
 
     if (!password || password.length < 6) {
         return NextResponse.json(
@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
             password: hashedPassword,
             fullname,
             course,
-            yearLevel
+            yearLevel,
+            role: role
         });
 
         // Format and create StudentTuition data
@@ -91,7 +92,8 @@ export async function POST(request: NextRequest) {
             fullname: user.fullname,
             course: user.course,
             yearLevel: user.yearLevel,
-            tuitionData: studentTuition
+            tuitionData: studentTuition,
+            role: user.role
         });
 
     } catch (error) {

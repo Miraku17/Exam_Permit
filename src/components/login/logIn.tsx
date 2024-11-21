@@ -123,7 +123,8 @@ export default function LoginPage() {
           email,
           password,
           course,
-          yearLevel
+          yearLevel,
+          role: 'student'
         }
         
         console.log('Signing up with:', data)
@@ -143,7 +144,8 @@ export default function LoginPage() {
         router.replace("home");
       }
     } catch (error) {
-      console.error(error)
+      console.log(error)
+      setError(error.response.data.message);
     } finally {
       setIsLoading(false)
     }

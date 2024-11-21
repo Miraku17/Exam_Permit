@@ -216,7 +216,7 @@ export default function DashboardPage() {
         studentTuition={studentTuition}
         selectedTerm={selectedTerm}
       />
-      <div className="mt-8">
+      {/* <div className="mt-8">
         {isLoading ? (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
             onReject={handleRejectPayment}
           />
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

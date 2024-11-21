@@ -27,7 +27,8 @@ export const authOptions: AuthOptions = {
                     email: userFound.email,
                     fullname: userFound.fullname,
                     course: userFound.course,
-                    yearLevel: userFound.yearLevel
+                    yearLevel: userFound.yearLevel,
+                    role: userFound.role,
                 };
                 
                 return userWithoutPassword;

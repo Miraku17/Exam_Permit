@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
             unique: true,
             required: [true, "Email is required"],
             match: [
-                /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/,
+                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                 "Please provide a valid email address"
             ]
         },
@@ -29,13 +29,23 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: [true, "yearLevel is required"],
         },
+        role: {
+            type: String,
+            default: 'student',
+            enum: ['student', 'admin'],
+            required: false
+        }
     }, 
     {
         timestamps: true,
+        strict: false,
     }
 );
 
-// Check if the model exists before creating a new one
-const User = mongoose.models.User || mongoose.model('User', userSchema);
+// Delete the existing model if it exists
+delete mongoose.models.User;
+
+// Create the model
+const User = mongoose.model('User', userSchema);
 
 export default User;

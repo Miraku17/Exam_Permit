@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 
 interface NavLink {
   href: string;
@@ -31,13 +31,36 @@ const Navbar = () => {
   };
   const pathname = usePathname();
   
-  const navigationLinks: NavLink[] = [
+  let navigationLinks: NavLink[] = [
     { href: "/home", label: "Home" },
-    { href: "/payment", label: "Payment" },
-    { href: "/history", label: "History" },
   ];
 
+  if (session?.user.role !== 'admin') 
+    navigationLinks = [
+      ...navigationLinks,
+      { href: "/payment", label: "Payment" },
+      { href: "/history", label: "History" },
+    ]
+
   const isActiveRoute = (href: string): boolean => pathname === href;
+
+  const navLinks = ({preClass, condiClass, condiTwoClass}: String) => {
+    return(
+      navigationLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className={`${preClass} ${
+            isActiveRoute(link.href)
+            ? condiClass
+            : condiTwoClass
+          }`}
+        >
+          {link.label}
+        </Link>
+      ))
+    )
+  }
 
   return (
     <nav className="bg-[#1a237e] text-white shadow-lg">
@@ -56,7 +79,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigationLinks.map((link) => (
+            {/* {navigationLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -68,7 +91,12 @@ const Navbar = () => {
               >
                 {link.label}
               </Link>
-            ))}
+            ))} */}
+            {navLinks({
+              preClass: "transition-colors font-bold",
+              condiClass: "text-yellow-300 border-b-2 border-yellow-300",
+              condiTwoClass: "hover:text-gray-300"
+            })}
           </div>
 
           {/* User Profile with Popover */}
@@ -86,9 +114,11 @@ const Navbar = () => {
                   {session?.user && (
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{session.user.fullname}</span>
-                      <span className="text-xs text-gray-300">
-                        {session.user.yearLevel + ' Student - ' + session.user.course}
-                      </span>
+                      { session?.user.role !== 'admin' &&
+                        <span className="text-xs text-gray-300">
+                          {session.user.yearLevel + ' Student - ' + session.user.course}
+                        </span>
+                      }
                     </div>
                   )}
                 </div>
@@ -99,7 +129,7 @@ const Navbar = () => {
                     <Button 
                       variant="ghost" 
                       className="w-full justify-start text-sm"
-                      onClick={() => {/* Add change password logic */}}
+                      onClick={() => redirect('/change-password')}
                     >
                       <KeyRound className="mr-2 h-4 w-4" />
                       Change Password
@@ -137,7 +167,7 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {navigationLinks.map((link) => (
+              {/* {navigationLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -149,7 +179,12 @@ const Navbar = () => {
                 >
                   {link.label}
                 </Link>
-              ))}
+              ))} */}
+              {navLinks({
+              preClass: "block px-3 py-2 rounded-md transition-colors",
+              condiClass: "bg-blue-900 text-yellow-300",
+              condiTwoClass: "hover:bg-blue-900"
+            })}
 
               {/* Mobile User Profile */}
               <div className="px-3 py-2">
