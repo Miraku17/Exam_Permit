@@ -1,4 +1,3 @@
-// app/api/send-permit/route.ts
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import jsPDF from "jspdf";
@@ -27,24 +26,49 @@ const transporter = nodemailer.createTransport({
 
 async function generatePermitPDF(studentData: StudentData) {
   const doc = new jsPDF();
+  
+  // Add name watermark
+  doc.setFontSize(100);
+  doc.setTextColor(220, 220, 220);
+  const watermarkState = new (doc as any).GState({ opacity: 0.2 });
+  
+  // Calculate watermark positions
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  
+  // Add multiple watermarks diagonally
+  for (let y = -20; y < pageHeight + 50; y += 60) {
+    for (let x = -50; x < pageWidth + 50; x += 100) { 
+      (doc as any).saveGraphicsState();
+      (doc as any).setGState(watermarkState);
+      doc.text(studentData.name, x, y, { 
+        angle: 45,
+        align: 'center'
+      });
+      (doc as any).restoreGraphicsState();
+    }
+  }
 
   // Read logo from public folder
   const logoPath = path.join(process.cwd(), "public", "unorlogo.png");
   const logoBase64 = fs.readFileSync(logoPath, { encoding: "base64" });
 
   // Add background logo with transparency
-  const gstate = new (doc as any).GState({ opacity: 0.1 });
+  const logoState = new (doc as any).GState({ opacity: 0.1 });
   (doc as any).saveGraphicsState();
-  (doc as any).setGState(gstate);
+  (doc as any).setGState(logoState);
   doc.addImage(
     `data:image/png;base64,${logoBase64}`,
     "PNG",
-    50, // x position
-    70, // y position
-    100, // width
-    100 // height
+    50,
+    70,
+    100,
+    100
   );
   (doc as any).restoreGraphicsState();
+
+  // Reset text color for regular content
+  doc.setTextColor(0, 0, 0);
 
   // Set font size and style
   doc.setFontSize(16);
