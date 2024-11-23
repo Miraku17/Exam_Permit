@@ -104,11 +104,16 @@ export default function DashboardPage() {
   }, [status, session?.user?._id]);
 
   const handleAcceptPayment = async (transactionId: string) => {
-
-    console.log("Trasaction ID", transactionId);
+    console.log("Transaction ID", transactionId);
     try {
       const response = await axios.post<ApiResponse>(
-        `/api/payments/${transactionId}/accept`
+        `/api/payments/${transactionId}/accept`,
+        { session },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (response.data.success) {
