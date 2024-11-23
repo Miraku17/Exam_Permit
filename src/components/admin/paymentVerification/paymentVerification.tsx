@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Check, X, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Check, X, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +47,21 @@ const PaymentVerificationTable = ({
     payment: PaymentHistory;
     action: 'accept' | 'reject';
   } | null>(null);
+  const [loadingTransactionId, setLoadingTransactionId] = useState<string | null>(null);
+
+  const handleAction = async (action: 'accept' | 'reject', transactionId: string) => {
+    setLoadingTransactionId(transactionId);
+    try {
+      if (action === 'accept' && onAccept) {
+        await onAccept(transactionId);
+      } else if (action === 'reject' && onReject) {
+        await onReject(transactionId);
+      }
+    } finally {
+      setLoadingTransactionId(null);
+      setConfirmationData(null);
+    }
+  };
 
   return (
     <Card className="w-full">
@@ -126,8 +141,12 @@ const PaymentVerificationTable = ({
                             })}
                             className="h-8 px-2"
                             title="Reject Payment"
+                            disabled={loadingTransactionId === payment.transactionId}
                           >
-                            <X className="w-4 h-4" />
+                            {loadingTransactionId === payment.transactionId ? 
+                              <Loader2 className="w-4 h-4 animate-spin" /> : 
+                              <X className="w-4 h-4" />
+                            }
                           </Button>
                         )}
                         {onAccept && (
@@ -140,8 +159,12 @@ const PaymentVerificationTable = ({
                             })}
                             className="h-8 px-2"
                             title="Accept Payment"
+                            disabled={loadingTransactionId === payment.transactionId}
                           >
-                            <Check className="w-4 h-4" />
+                            {loadingTransactionId === payment.transactionId ? 
+                              <Loader2 className="w-4 h-4 animate-spin" /> : 
+                              <Check className="w-4 h-4" />
+                            }
                           </Button>
                         )}
                       </div>
@@ -168,7 +191,7 @@ const PaymentVerificationTable = ({
             </DialogHeader>
             <div className="aspect-video relative bg-gray-100 rounded-lg overflow-hidden">
               <img 
-                src={selectedImage || null } 
+                src={selectedImage || ''} 
                 alt="Proof of Payment" 
                 className="object-contain w-full h-full"
               />
@@ -188,7 +211,7 @@ const PaymentVerificationTable = ({
         {/* Confirmation Dialog */}
         <AlertDialog 
           open={!!confirmationData} 
-          onOpenChange={() => setConfirmationData(null)}
+          onOpenChange={(open) => !open && setConfirmationData(null)}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -217,14 +240,15 @@ const PaymentVerificationTable = ({
               <AlertDialogAction
                 className={confirmationData?.action === 'accept' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
                 onClick={() => {
-                  if (confirmationData?.action === 'accept' && onAccept) {
-                    onAccept(confirmationData.payment.transactionId);
-                  } else if (confirmationData?.action === 'reject' && onReject) {
-                    onReject(confirmationData.payment.transactionId);
+                  if (confirmationData?.payment) {
+                    handleAction(confirmationData.action, confirmationData.payment.transactionId);
                   }
-                  setConfirmationData(null);
                 }}
+                disabled={!!loadingTransactionId}
               >
+                {loadingTransactionId === confirmationData?.payment?.transactionId ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
                 {confirmationData?.action === 'accept' ? 'Accept' : 'Reject'}
               </AlertDialogAction>
             </AlertDialogFooter>
