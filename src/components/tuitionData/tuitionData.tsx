@@ -64,9 +64,7 @@ const TuitionData: React.FC<TuitionDataProps> = ({
 }) => {
   const { data: session } = useSession();
   const { toast } = useToast();
-  const [loadingTerms, setLoadingTerms] = useState<{ [key: string]: boolean }>(
-    {}
-  );
+  const [loadingTerms, setLoadingTerms] = useState<{ [key: string]: boolean }>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
   const courseData: Course[] = data?.courses || [];
@@ -74,6 +72,11 @@ const TuitionData: React.FC<TuitionDataProps> = ({
   const currentSemester = studentTuition?.semesters[semesterIndex];
 
   const title = selectedTerm === "1st" ? "1st Semester" : "2nd Semester";
+
+  const getOrdinalTerm = (index: number): string => {
+    const ordinals = ["1st", "2nd", "3rd"];
+    return ordinals[index] || `${index + 1}th`;
+  };
 
   useEffect(() => {
     console.log("Student Tuition Data:", studentTuition);
@@ -199,7 +202,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({
                     <TableBody>
                       {currentSemester.terms.map((term, index) => (
                         <TableRow key={term._id}>
-                          <TableCell>{term.term}</TableCell>
+                          <TableCell>{getOrdinalTerm(index)}</TableCell>
+                          
                           <TableCell>
                             ₱
                             {term.dueAmount.toLocaleString(undefined, {

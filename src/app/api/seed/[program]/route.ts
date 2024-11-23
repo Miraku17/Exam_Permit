@@ -171,7 +171,10 @@ interface ICourse {
 function generateRandomValues() {
   const academicUnits = Math.floor(Math.random() * 4) + 1;
   const lecValue = (Math.floor(Math.random() * 2000) + 1000).toFixed(2);
-  const labValue = Math.random() < 0.5 ? 0 : (Math.floor(Math.random() * 2000) + 500).toFixed(2);
+  const labValue =
+    Math.random() < 0.5
+      ? 0
+      : (Math.floor(Math.random() * 2000) + 500).toFixed(2);
   const totalFee = parseFloat(lecValue) + parseFloat(labValue);
   const termPayment = (totalFee / 4).toFixed(2);
 
@@ -186,7 +189,7 @@ function generateRandomValues() {
 
 function createTerms(totalFee: number): ITerm[] {
   const termAmount = totalFee / 4;
-  
+
   return [
     { name: "Pre-Midterm", due: termAmount, paid: 0, balance: termAmount },
     { name: "Midterm", due: termAmount, paid: 0, balance: termAmount },
@@ -217,8 +220,14 @@ function createCourseStructure(courseCode: string): ICourse {
 }
 
 function calculateSemesterTotals(courses: ICourse[]) {
-  const totalLecture = courses.reduce((sum, course) => sum + course.totalCourseFee.lecture, 0);
-  const totalLaboratory = courses.reduce((sum, course) => sum + course.totalCourseFee.laboratory, 0);
+  const totalLecture = courses.reduce(
+    (sum, course) => sum + course.totalCourseFee.lecture,
+    0
+  );
+  const totalLaboratory = courses.reduce(
+    (sum, course) => sum + course.totalCourseFee.laboratory,
+    0
+  );
   const grandTotal = totalLecture + totalLaboratory;
   const termAmount = grandTotal / 4;
 
@@ -246,11 +255,68 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     await connectDB();
     const { program } = params;
 
+    // Handle seeding for all programs
+    if (program === "all") {
+      await Semester.deleteMany({}); // Clear all existing data
+      const allSemesters = [];
+
+      // Process each program
+      for (const [programCode, programData] of Object.entries(coursePrograms)) {
+        const programSemesters = [];
+        const yearMapping = {
+          firstYear: 1,
+          secondYear: 2,
+          thirdYear: 3,
+          fourthYear: 4,
+        };
+
+        for (const [year, yearData] of Object.entries(programData)) {
+          const yearNumber = yearMapping[year];
+
+          if (yearData.firstSemester) {
+            const courses = yearData.firstSemester.map((code) =>
+              createCourseStructure(code)
+            );
+
+            programSemesters.push({
+              programCode,
+              semester: 1,
+              year: yearNumber,
+              courses,
+              totals: calculateSemesterTotals(courses),
+            });
+          }
+
+          if (yearData.secondSemester) {
+            const courses = yearData.secondSemester.map((code) =>
+              createCourseStructure(code)
+            );
+
+            programSemesters.push({
+              programCode,
+              semester: 2,
+              year: yearNumber,
+              courses,
+              totals: calculateSemesterTotals(courses),
+            });
+          }
+        }
+
+        allSemesters.push(...programSemesters);
+      }
+
+      await Semester.insertMany(allSemesters);
+
+      return NextResponse.json({
+        message: "Seeding completed for all programs",
+        programsSeeded: Object.keys(coursePrograms),
+        totalSemesters: allSemesters.length,
+      });
+    }
+
+    // Handle single program seeding
     if (!coursePrograms[program]) {
-      return NextResponse.json(
-        { error: "Program not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Program not found" }, { status: 404 });
     }
 
     await Semester.deleteMany({ programCode: program });
@@ -272,7 +338,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         const courses = yearData.firstSemester.map((code) =>
           createCourseStructure(code)
         );
-        
+
         semesters.push({
           programCode: program,
           semester: 1,
@@ -286,7 +352,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
         const courses = yearData.secondSemester.map((code) =>
           createCourseStructure(code)
         );
-        
+
         semesters.push({
           programCode: program,
           semester: 2,
@@ -298,16 +364,13 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     }
 
     await Semester.insertMany(semesters);
-    
+
     return NextResponse.json({
       message: `Seeding completed for ${program}`,
       semesters,
     });
   } catch (error) {
-    console.error('Seeding error:', error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    console.error("Seeding error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

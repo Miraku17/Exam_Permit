@@ -43,7 +43,7 @@ const paymentSchema = new Schema<IPayment>(
     },
     paymentGateway: {
       type: String,
-      enum: ["GCash"],
+      enum: ["GCash", "Debit Card", "Credit Card"],
       required: [true, "Payment gateway is required"],
     },
     amount: { type: Number, required: true },
