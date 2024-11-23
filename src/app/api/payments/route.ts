@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       mobileNumber: (formData.get("mobileNumber") as string)?.trim(),
       emailAddress: (formData.get("email") as string)?.trim().toLowerCase(),
       referenceNumber: (formData.get("referenceNumber") as string)?.trim(),
-      paymentGateway: formData.get("paymentMethod") as "GCash",
+      paymentGateway: formData.get("paymentMethod") as string,
       amount: amount,
       proofOfPaymentUrl: proofOfPaymentUrl,
       status: "pending" as const,

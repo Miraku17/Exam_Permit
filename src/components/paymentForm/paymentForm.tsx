@@ -34,7 +34,7 @@ import { useSession } from "next-auth/react";
 const PaymentForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("GCash");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -56,7 +56,7 @@ const PaymentForm = () => {
     // Reset all states
     setSelectedFile(null);
     setValidationErrors([]);
-    setPaymentMethod("GCash");
+    setPaymentMethod("");
     setSubmitError(null);
     
     // Reset file input
@@ -76,6 +76,10 @@ const PaymentForm = () => {
       referenceNumber: "Reference Number",
       amount: "Amount",
     };
+
+    if (!paymentMethod) {
+      errors.push("Payment method is required");
+    }
 
     Object.entries(requiredFields).forEach(([fieldId, fieldName]) => {
       const element = form.elements.namedItem(fieldId) as HTMLInputElement;
@@ -272,6 +276,9 @@ const PaymentForm = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="GCash">GCash</SelectItem>
+                      <SelectItem value="Debit Card">Debit Card</SelectItem>
+                      <SelectItem value="Credit Card">Credit Card</SelectItem>
+
                     </SelectContent>
                   </Select>
                 </div>

@@ -41,18 +41,16 @@ export interface ISemester {
   year: number;
   courses: ICourse[];
   totals: ISemesterTotals;
-
 }
 
-
 export interface IPayment {
-  studentId: string,
+  studentId: string;
   transactionId: string;
   fullName: string;
   mobileNumber: string;
   emailAddress: string;
   referenceNumber: string;
-  paymentGateway: "GCash";
+  paymentGateway: "GCash" | "Debit Card" | "Credit Card";
   amount: number;
   proofOfPaymentUrl: string;
   status: "pending" | "verified" | "rejected";
