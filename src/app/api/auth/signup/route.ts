@@ -31,15 +31,16 @@ export async function POST(request: NextRequest) {
 
         // Create the user first
         const hashedPassword = await bcrypt.hash(password, 12);
-        const user = await User.create({
-            email,
+        const data = {
+            email: email,
             password: hashedPassword,
-            fullname,
-            course,
-            yearLevel,
-            role: role
-        });
-
+            fullname: fullname,
+            course: course,
+            yearLevel: yearLevel,
+            role: 'student',
+        };
+        const user = await User.create(data);
+        console.log('Created User:', user);
         // Format and create StudentTuition data
         const studentTuitionData = {
             userId: user._id, // Link to the created user
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
             course: user.course,
             yearLevel: user.yearLevel,
             tuitionData: studentTuition,
-            role: user.role
+            role: user?.role,
         });
 
     } catch (error) {
