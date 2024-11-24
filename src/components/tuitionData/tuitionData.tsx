@@ -31,6 +31,7 @@ interface Term {
   dueAmount: number;
   paid: number;
   balance: number;
+  examPermitRequested: number | null;
   _id: string;
 }
 
@@ -68,19 +69,26 @@ const TuitionData: React.FC<TuitionDataProps> = ({
     {}
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  // Add currentSemester as state
+  const [currentSemester, setCurrentSemester] = useState<Semester | null>(null);
 
   const courseData: Course[] = data?.courses || [];
   const semesterIndex = selectedTerm === "1st" ? 0 : 1;
-  const currentSemester = studentTuition?.semesters[semesterIndex];
-
   const title = selectedTerm === "1st" ? "1st Semester" : "2nd Semester";
 
+  // Update currentSemester when studentTuition or selectedTerm changes
   useEffect(() => {
-    console.log("Student Tuition Data:", studentTuition);
-  }, [studentTuition]);
+    if (studentTuition?.semesters[semesterIndex]) {
+      setCurrentSemester(
+        JSON.parse(JSON.stringify(studentTuition.semesters[semesterIndex]))
+      );
+    } else {
+      setCurrentSemester(null);
+    }
+  }, [studentTuition, semesterIndex]);
 
   const canRequestPermit = (term: Term) => {
-    return term.balance === 0;
+    return term.balance === 0 && term.examPermitRequested < 2;
   };
 
   const handleRequestPermit = async (term: Term): Promise<void> => {
@@ -98,6 +106,8 @@ const TuitionData: React.FC<TuitionDataProps> = ({
           code: course.courseCode,
           section: "C20",
         })),
+        studentTuitionId: studentTuition?._id,
+        semesterNumber: studentTuition?.semesters[semesterIndex].semester,
       };
 
       const response = await fetch("/api/send-permit", {
@@ -105,13 +115,27 @@ const TuitionData: React.FC<TuitionDataProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(permitData),
       });
-
+      
       if (!response.ok) throw new Error("Failed to send permit request");
+      
+      // Update the currentSemester state after successful request
+      setCurrentSemester((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          terms: prev.terms.map((t) =>
+            t._id === term._id
+              ? { ...t, examPermitRequested: (t.examPermitRequested || 0) + 1 }
+              : t
+          ),
+        };
+      });
 
       toast({
         title: "Success",
         description: "Exam permit has been sent to your email.",
       });
+
     } catch (error) {
       toast({
         title: "Error",

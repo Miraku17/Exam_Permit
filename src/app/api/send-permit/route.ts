@@ -3,6 +3,9 @@ import nodemailer from "nodemailer";
 import jsPDF from "jspdf";
 import path from "path";
 import fs from "fs";
+import connectDB from "@/lib/mongodb";
+import mongoose from "mongoose";
+import { StudentTuition } from "@/models/studentTuition";
 
 interface StudentData {
   name: string;
@@ -14,6 +17,8 @@ interface StudentData {
     code: string;
     section: string;
   }>;
+  semesterNumber: number;
+  studentTuitionId: string;
 }
 
 const transporter = nodemailer.createTransport({
@@ -151,7 +156,8 @@ async function generatePermitPDF(studentData: StudentData) {
 
 export async function POST(request: Request) {
   try {
-    const { name, college, semester, schoolYear, courses, email, term } =
+    await connectDB();
+    const { name, college, semester, schoolYear, courses, email, term, studentTuitionId, semesterNumber } =
       await request.json();
 
     const studentData: StudentData = {
@@ -183,6 +189,23 @@ export async function POST(request: Request) {
         },
       ],
     });
+
+    const studentTuition = await StudentTuition.findByIdAndUpdate(
+      studentTuitionId,
+      {
+        $inc: {
+          "semesters.$[sem].terms.$[t].examPermitRequested": 1
+        }
+      },
+      {
+        arrayFilters: [
+          { "sem.semester": semesterNumber },
+          { "t.term": term }
+        ],
+        new: true,
+        runValidators: true
+      }
+    );
 
     return NextResponse.json(
       {

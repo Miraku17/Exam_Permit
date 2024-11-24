@@ -15,6 +15,10 @@ const studentTuitionSchema = new mongoose.Schema({
           dueAmount: Number,
           paid: { type: Number, default: 0 },
           balance: Number,
+          examPermitRequested: {
+            type: Number,
+            default: 0
+          }
         },
       ],
       totalPayments: { type: Number, default: 0 },
@@ -23,6 +27,7 @@ const studentTuitionSchema = new mongoose.Schema({
   ],
 });
 
-export const StudentTuition =
-  mongoose.models.StudentTuition ||
-  mongoose.model("StudentTuition", studentTuitionSchema);
+
+delete mongoose.models.StudentTuition;
+
+export const StudentTuition = mongoose.model("StudentTuition", studentTuitionSchema);
