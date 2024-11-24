@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
     const { fullname, email, password, course, yearLevel, role = 'student' } = await request.json();
-
+    const INITIAL_PAYMENT = 1500;
     if (!password || password.length < 6) {
         return NextResponse.json(
             { message: 'Password must be at least 6 characters' }, 
@@ -47,32 +47,44 @@ export async function POST(request: NextRequest) {
             userId: user._id,
             semesters: semesters.map(sem => {
                 const termTotal = sem.totals.grandTotal;
+                const firstTermAmount = termTotal * 0.4; // 40% for first term
+                
+                // Calculate first term balance after initial payment
+                const firstTermBalance = Math.max(firstTermAmount - INITIAL_PAYMENT, 0);
+                const firstTermPaid = Math.min(INITIAL_PAYMENT, firstTermAmount);
+
                 const termPayments = [
                     {
                         term: '1st Term',
-                        dueAmount: termTotal * 0.4, // 40% for first term
-                        paid: 0,
-                        balance: termTotal * 0.4
+                        dueAmount: firstTermAmount,
+                        paid: firstTermPaid,
+                        balance: firstTermBalance,
+                        examPermitRequested: 0
                     },
                     {
                         term: '2nd Term',
-                        dueAmount: termTotal * 0.3, // 30% for second term
+                        dueAmount: termTotal * 0.3,
                         paid: 0,
-                        balance: termTotal * 0.3
+                        balance: termTotal * 0.3,
+                        examPermitRequested: 0
                     },
                     {
                         term: '3rd Term',
-                        dueAmount: termTotal * 0.3, // 30% for third term
+                        dueAmount: termTotal * 0.3,
                         paid: 0,
-                        balance: termTotal * 0.3
+                        balance: termTotal * 0.3,
+                        examPermitRequested: 0
                     }
                 ];
+
+                const totalPayments = firstTermPaid; 
+                const remainingBalance = termTotal - totalPayments;
 
                 return {
                     semester: sem.semester,
                     terms: termPayments,
-                    totalPayments: 0,
-                    remainingBalance: termTotal
+                    totalPayments: totalPayments,
+                    remainingBalance: remainingBalance
                 };
             })
         };
