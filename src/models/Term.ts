@@ -4,7 +4,7 @@ import { ITerm } from './types';
 const TermSchema = new Schema<ITerm>({
   name: {
     type: String,
-    enum: ['Pre-Midterm', 'Midterm', 'Pre-Final', 'Final'],
+    enum: ['1st', '2nd', '3rd'],
     required: true
   },
   due: {
