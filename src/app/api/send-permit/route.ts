@@ -6,6 +6,7 @@ import fs from "fs";
 import connectDB from "@/lib/mongodb";
 import mongoose from "mongoose";
 import { StudentTuition } from "@/models/studentTuition";
+import { Permit } from "@/models/Permit";
 
 interface StudentData {
   name: string;
@@ -29,7 +30,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function generatePermitPDF(studentData: StudentData) {
+async function generatePermitPDF({ studentData, permitNo }: { studentData: StudentData, permitNo: string }) {
   const doc = new jsPDF();
   
   // Add name watermark
@@ -95,7 +96,7 @@ async function generatePermitPDF(studentData: StudentData) {
 
   // Add permit number
   doc.setFontSize(10);
-  const permitNo = Math.random().toString().slice(2, 10);
+  // const permitNo = Math.random().toString().slice(2, 10);
   doc.text(`Permit No. ${permitNo}`, 170, 65, { align: "right" });
 
   // Add main content
@@ -174,7 +175,8 @@ export async function POST(request: Request) {
       ],
     };
 
-    const pdfBuffer = await generatePermitPDF(studentData);
+    const permitNo = Math.random().toString().slice(2, 10);
+    const pdfBuffer = await generatePermitPDF({studentData, permitNo});
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -188,6 +190,20 @@ export async function POST(request: Request) {
           contentType: "application/pdf",
         },
       ],
+    });
+
+    const permit = await Permit.create({
+      studentTuitionId: new mongoose.Types.ObjectId(studentTuitionId),
+      permitNo,
+      name,
+      email,
+      college,
+      semester: semesterNumber,
+      term,
+      schoolYear,
+      courses,
+      dateIssued: new Date(),
+      isValid: true
     });
 
     const studentTuition = await StudentTuition.findByIdAndUpdate(
