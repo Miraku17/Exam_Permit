@@ -1,5 +1,5 @@
 export interface ITerm {
-  name: "Pre-Midterm" | "Midterm" | "Pre-Final" | "Final";
+  name: "1st" | "2nd" | "3rd" ;
   due: number;
   paid: number;
   balance: number;

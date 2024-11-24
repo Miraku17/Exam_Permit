@@ -144,7 +144,7 @@ const coursePrograms = {
 };
 
 interface ITerm {
-  name: "Pre-Midterm" | "Midterm" | "Pre-Final" | "Final";
+  name: "1st" | "2nd" | "3rd";
   due: number;
   paid: number;
   balance: number;
@@ -191,10 +191,10 @@ function createTerms(totalFee: number): ITerm[] {
   const termAmount = totalFee / 4;
 
   return [
-    { name: "Pre-Midterm", due: termAmount, paid: 0, balance: termAmount },
-    { name: "Midterm", due: termAmount, paid: 0, balance: termAmount },
-    { name: "Pre-Final", due: termAmount, paid: 0, balance: termAmount },
-    { name: "Final", due: termAmount, paid: 0, balance: termAmount },
+    { name: "1st", due: termAmount, paid: 0, balance: termAmount },
+    { name: "2nd", due: termAmount, paid: 0, balance: termAmount },
+    { name: "3rd", due: termAmount, paid: 0, balance: termAmount },
+
   ];
 }
 

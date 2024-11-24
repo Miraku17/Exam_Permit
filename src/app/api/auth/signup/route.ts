@@ -41,35 +41,30 @@ export async function POST(request: NextRequest) {
         };
         const user = await User.create(data);
         console.log('Created User:', user);
-        // Format and create StudentTuition data
+
+        // Format and create StudentTuition data with three terms
         const studentTuitionData = {
-            userId: user._id, // Link to the created user
+            userId: user._id,
             semesters: semesters.map(sem => {
                 const termTotal = sem.totals.grandTotal;
                 const termPayments = [
                     {
-                        term: 'Pre-Midterm',
-                        dueAmount: termTotal * 0.3,
+                        term: '1st Term',
+                        dueAmount: termTotal * 0.4, // 40% for first term
+                        paid: 0,
+                        balance: termTotal * 0.4
+                    },
+                    {
+                        term: '2nd Term',
+                        dueAmount: termTotal * 0.3, // 30% for second term
                         paid: 0,
                         balance: termTotal * 0.3
                     },
                     {
-                        term: 'Midterm',
-                        dueAmount: termTotal * 0.3,
+                        term: '3rd Term',
+                        dueAmount: termTotal * 0.3, // 30% for third term
                         paid: 0,
                         balance: termTotal * 0.3
-                    },
-                    {
-                        term: 'Pre-Final',
-                        dueAmount: termTotal * 0.2,
-                        paid: 0,
-                        balance: termTotal * 0.2
-                    },
-                    {
-                        term: 'Final',
-                        dueAmount: termTotal * 0.2,
-                        paid: 0,
-                        balance: termTotal * 0.2
                     }
                 ];
 
