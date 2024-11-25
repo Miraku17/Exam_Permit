@@ -182,7 +182,7 @@ const TuitionData: React.FC<TuitionDataProps> = ({
                           <TableCell>{course.academicUnits}</TableCell>
                           <TableCell>{course.lecValue.toFixed(2)}</TableCell>
                           <TableCell>{course.labValue.toFixed(2)}</TableCell>
-                          <TableCell className="text-green-600">
+                          <TableCell className={course.status == 'Regular'? "text-green-600": "text-red-600"}>
                             {course.status}
                           </TableCell>
                         </TableRow>
